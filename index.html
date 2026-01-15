@@ -125,9 +125,38 @@
             margin-top: 2px;
             text-transform: uppercase;
         }
+
+        /* 啟動畫板 */
+        #setup-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-industrial);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body class="p-2 md:p-6 text-slate-800">
+
+<!-- 遊戲初始設定畫面 -->
+<div id="setup-screen">
+    <div class="bg-white p-12 rounded-[3rem] shadow-2xl text-center max-w-md w-full mx-4 border-b-8 border-yellow-400">
+        <h1 class="text-4xl font-black text-slate-800 mb-2 italic">預拌廠大亨</h1>
+        <p class="text-slate-400 font-bold mb-8 uppercase tracking-widest">廠區作業流程教學系統</p>
+        
+        <p class="text-sm font-bold text-slate-600 mb-6">請選擇參與作業的人數：</p>
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="startGame(1)" class="bg-slate-100 hover:bg-blue-500 hover:text-white py-4 rounded-2xl font-black transition-all">1 人練習</button>
+            <button onclick="startGame(2)" class="bg-slate-100 hover:bg-blue-500 hover:text-white py-4 rounded-2xl font-black transition-all">2 人對戰</button>
+            <button onclick="startGame(3)" class="bg-slate-100 hover:bg-blue-500 hover:text-white py-4 rounded-2xl font-black transition-all">3 人競賽</button>
+            <button onclick="startGame(4)" class="bg-slate-100 hover:bg-blue-500 hover:text-white py-4 rounded-2xl font-black transition-all">4 人大會戰</button>
+        </div>
+        <p class="mt-8 text-[10px] text-slate-300">本系統為本地單機版本，所有資料儲存於瀏覽器分頁中</p>
+    </div>
+</div>
 
 <div class="max-w-7xl mx-auto">
     <header class="flex flex-col lg:flex-row justify-between items-center mb-8 bg-white p-6 rounded-[2rem] shadow-sm border-b-4 border-slate-200">
@@ -224,10 +253,7 @@
 
 <script>
     // --- 本地遊戲狀態 ---
-    let players = [
-        { id: 0, name: "作業員 A", pos: 0, balance: 15000, color: "#3b82f6", owned_data: {} },
-        { id: 1, name: "作業員 B", pos: 0, balance: 15000, color: "#f43f5e", owned_data: {} }
-    ];
+    let players = [];
     let currentTurnPlayerIdx = 0;
     
     // --- 地圖資料定義 (完整保留專業描述) ---
@@ -275,12 +301,32 @@
 
     // --- 遊戲邏輯 ---
 
+    function startGame(count) {
+        const colors = ["#3b82f6", "#f43f5e", "#10b981", "#f59e0b"];
+        const names = ["作業員 A", "作業員 B", "作業員 C", "作業員 D"];
+        
+        players = [];
+        for (let i = 0; i < count; i++) {
+            players.push({
+                id: i,
+                name: names[i],
+                pos: 0,
+                balance: 15000,
+                color: colors[i],
+                owned_data: {}
+            });
+        }
+        
+        document.getElementById('setup-screen').style.display = 'none';
+        initGame();
+    }
+
     function initGame() {
         renderBoard();
         updatePlayersUI();
         updateTurnUI();
-        addLog("🏭 預拌廠生產系統啟動 (本地模式)");
-        addLog("提示：目前為雙人練習模式，請點擊下方按鈕擲骰子。");
+        addLog("🏭 預拌廠生產系統啟動");
+        addLog(`提示：目前有 ${players.length} 位作業員在場。`);
     }
 
     function renderBoard() {
@@ -362,7 +408,6 @@
         document.querySelectorAll('.player-token').forEach(el => el.remove());
 
         players.forEach((p, idx) => {
-            // 左側清單
             const div = document.createElement('div');
             const isCurrent = idx === currentTurnPlayerIdx;
             div.className = `p-3 rounded-2xl flex justify-between items-center text-[10px] shadow-sm border ${isCurrent ? 'bg-blue-50 border-blue-200 font-black' : 'bg-white border-transparent'}`;
@@ -373,20 +418,17 @@
                 document.getElementById('player-balance').innerText = `$${p.balance}`;
             }
 
-            // 地圖上的 Token
             const tile = document.querySelector(`[data-idx="${p.pos}"]`);
             if (tile) {
                 const token = document.createElement('div');
                 token.className = 'player-token';
                 token.style.backgroundColor = p.color;
                 token.innerText = p.name.slice(-1);
-                // 處理多人重疊位移
                 const offset = idx * 5;
                 token.style.transform = `translate(${offset}px, ${offset}px)`;
                 tile.appendChild(token);
             }
 
-            // 所有權標記
             Object.keys(p.owned_data).forEach(tileIdx => {
                 const el = document.querySelector(`[data-idx="${tileIdx}"]`);
                 if (el) { el.style.boxShadow = `inset 0 0 0 4px ${p.color}`; el.style.borderRadius = '8px'; }
@@ -435,7 +477,6 @@
         } else if (t.specialType === 'fate' || t.specialType === 'chance') {
             triggerChanceEvent();
         } else {
-            // 中控室起點
             nextTurn();
         }
     }
@@ -562,7 +603,6 @@
             delete p.owned_data[p.pos];
             addLog(`💰 ${p.name} 變賣了資產，回收 $${ref}`);
             updatePlayersUI();
-            // 清除視覺標記
             renderBoard(); 
             updatePlayersUI();
         }
@@ -591,8 +631,6 @@
 
     function closeModal(id) { document.getElementById(id).classList.remove('active-modal'); }
 
-    // 啟動
-    window.onload = initGame;
 </script>
 </body>
 </html>
