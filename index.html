@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>預拌廠大亨 - 專業流程 32 格版 (修復連線版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+    <style>
+        :root { --bg-industrial: #f8fafc; --chrome-yellow: #FFB900; --start-green: #10b981; }
+        body { background-color: var(--bg-industrial); font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+        
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            gap: 4px;
+            width: 95vw;
+            max-width: 850px;
+            aspect-ratio: 1 / 1;
+            margin: 10px auto;
+            background: #cbd5e1;
+            padding: 8px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        .tile {
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            font-size: 0.65rem;
+            position: relative;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .tile:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 50; }
+        .tile-header { height: 6px; width: 100%; position: absolute; top: 0; left: 0; border-radius: 8px 8px 0 0; }
+        
+        .tile-special { color: #1e293b; font-weight: 900; }
+        .tile-yellow { background-color: var(--chrome-yellow) !important; }
+        .tile-green { background-color: var(--start-green) !important; color: white; }
+
+        .tile-no {
+            position: absolute;
+            top: 6px;
+            left: 4px;
+            font-size: 8px;
+            color: #94a3b8;
+            font-weight: 800;
+        }
+        
+        .tile-special .tile-no { color: rgba(255, 255, 255, 0.4); }
+        .tile-yellow .tile-no { color: rgba(30, 41, 59, 0.4); }
+
+        .player-token {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 6px;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            z-index: 60;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.8);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        .active-modal { display: flex; }
+
+        .log-box {
+            height: 250px;
+            overflow-y: auto;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            font-family: 'Fira Code', monospace;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            border: 1px solid #334155;
+        }
+
+        .board-center {
+            grid-area: 2 / 2 / 9 / 9;
+            background: rgba(255, 255, 255, 0.4);
+            border: 4px dashed #e2e8f0;
+            border-radius: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 10px;
+            pointer-events: none;
+        }
+        
+        .start-label {
+            font-size: 7px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1px 4px;
+            border-radius: 4px;
+            margin-top: 2px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="p-2 md:p-6 text-slate-800">
+
+<div class="max-w-7xl mx-auto">
+    <header class="flex flex-col lg:flex-row justify-between items-center mb-8 bg-white p-6 rounded-[2rem] shadow-sm border-b-4 border-slate-200">
+        <div class="text-center lg:text-left">
+            <h1 class="text-3xl font-black text-slate-800 tracking-tighter italic">預拌廠大亨 <span class="text-blue-600">PRODUCTION LOOP</span></h1>
+            <p id="user-info" class="text-xs text-slate-400 font-bold tracking-[0.2em] uppercase mt-1 italic">正在連線至生產中心庫...</p>
+        </div>
+        <div class="flex items-center gap-8 mt-4 lg:mt-0">
+            <div class="bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100 text-center">
+                <p class="text-[10px] text-emerald-500 font-black uppercase tracking-widest">營運流動資金</p>
+                <div id="player-balance" class="text-3xl font-black text-emerald-700">$ --</div>
+            </div>
+            <div id="turn-indicator" class="px-8 py-3 rounded-full font-black text-sm shadow-sm transition-all uppercase tracking-widest text-center">正在登錄身分...</div>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        <div class="xl:col-span-1 space-y-6">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="font-black text-slate-700 mb-5 flex items-center gap-3 text-sm uppercase tracking-wide">
+                    <span class="w-2 h-6 bg-yellow-400 rounded-full"></span> 廠區作業員
+                </h3>
+                <div id="players-list" class="space-y-3 text-slate-400 italic text-xs">載入中...</div>
+            </div>
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="font-black text-slate-700 mb-5 flex items-center gap-3 text-sm uppercase tracking-wide">
+                    <span class="w-2 h-6 bg-blue-500 rounded-full"></span> 生產通訊日誌
+                </h3>
+                <div id="game-logs" class="log-box"></div>
+            </div>
+        </div>
+
+        <div class="xl:col-span-3">
+            <div id="game-board"></div>
+            <div class="mt-8 flex gap-4">
+                <button id="roll-btn" disabled class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-black py-6 rounded-3xl shadow-2xl transition-all text-xl flex items-center justify-center gap-4 group">
+                    <span class="group-hover:rotate-12 transition-transform">🎲</span> 啟動生產循環
+                </button>
+                <button onclick="handleSellCurrent()" class="px-10 bg-white hover:bg-red-50 text-red-500 font-black rounded-3xl border-2 border-red-100 transition-all text-sm uppercase">
+                    變賣設備
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="property-modal" class="modal">
+    <div class="bg-white rounded-[2.5rem] p-10 max-w-lg w-full mx-4 shadow-2xl relative overflow-hidden">
+        <div id="prop-color" class="absolute top-0 left-0 w-full h-4"></div>
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h2 id="prop-name" class="text-3xl font-black text-slate-800 mt-2">設備名稱</h2>
+            </div>
+            <div class="bg-blue-50 px-5 py-3 rounded-2xl border border-blue-100 text-center">
+                <p class="text-[10px] text-blue-400 font-black uppercase">等級</p>
+                <p id="prop-level" class="text-2xl font-black text-blue-600">Lv.1</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 mb-6">
+            <span class="bg-slate-100 px-3 py-1 rounded-lg text-[10px] font-black text-slate-500 uppercase tracking-widest">公司報價</span>
+            <span id="prop-price" class="text-2xl font-black text-slate-700">$0</span>
+        </div>
+        <div id="prop-desc" class="bg-slate-50 p-6 rounded-2xl text-sm text-slate-600 leading-relaxed border border-slate-100 mb-8 italic whitespace-pre-wrap">介紹內容載入中...</div>
+        <div id="upgrade-section" class="mb-8 hidden">
+            <p class="font-black text-slate-700 text-xs uppercase mb-3 tracking-widest flex items-center gap-2">
+                <span class="w-1 h-3 bg-yellow-400 rounded-full"></span> 升級配件與模組
+            </p>
+            <div id="upgrade-list" class="space-y-3"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="p-4 bg-red-50 border border-red-100 rounded-2xl">
+                <p class="text-[9px] text-red-400 font-black uppercase mb-1 tracking-wider">故障維修 (30%)</p>
+                <p id="prop-fee-repair" class="text-xl font-black text-red-600">-$0</p>
+            </div>
+            <div class="p-4 bg-orange-50 border border-orange-100 rounded-2xl">
+                <p class="text-[9px] text-orange-400 font-black uppercase mb-1 tracking-wider">定期保養 (40%)</p>
+                <p id="prop-fee-maint" class="text-xl font-black text-orange-600">-$0</p>
+            </div>
+        </div>
+        <div class="flex gap-4" id="prop-actions"></div>
+    </div>
+</div>
+
+<div id="msg-modal" class="modal">
+    <div class="bg-white rounded-[3rem] p-12 max-w-md w-full mx-4 text-center shadow-2xl border border-slate-100">
+        <div id="msg-icon" class="text-8xl mb-8">📢</div>
+        <h3 id="msg-title" class="text-2xl font-black text-slate-800 mb-4 tracking-tight">通知內容</h3>
+        <p id="msg-body" class="text-slate-500 mb-10 text-lg leading-relaxed">生產線狀態更新中...</p>
+        <button onclick="closeModal('msg-modal')" class="w-full bg-slate-900 text-white py-5 rounded-[1.5rem] font-black shadow-xl hover:bg-slate-800 transition-all text-xl">確認收悉</button>
+    </div>
+</div>
+
+<script>
+    // --- 環境與連線設定 ---
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'batching-plant-loop-final-v13';
+    let firebaseConfig = {};
+    try {
+        firebaseConfig = JSON.parse(__firebase_config);
+    } catch (e) {
+        console.error("無法載入配置，請確認連線環境。");
+    }
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    let currentUser = null;
+    let gameState = { players: {}, turn: null };
+
+    // --- 地圖資料定義 ---
+    const INITIAL_TILES = [
+        { type: 'special', name: '中控室', color: '#10b981', desc: '全廠的大腦，負責調度、監控與配比管理。起點。', specialType: 'start' },
+        { type: 'prop', name: '卡車卸料斗', price: 1200, color: '#3b82f6', desc: '砂石車卸料承接的斗子，透過震動機搭配篩網可以過篩沙子跟石頭讓顆粒不會過大。', fees:{repair:400, maint:150}, upgrades:[{name:'升級: 防塵屋', price:800, type:'step', levelReq:1},{name:'升級: 收料室', price:1200, type:'step', levelReq:2}]},
+        { type: 'prop', name: '入庫尾輪座', price: 800, color: '#3b82f6', desc: '帶運機的最末端，頭尾相連支撐整個帶運機的輸送皮帶，使其可以進行送料。', fees:{repair:300, maint:100} },
+        { type: 'prop', name: '入庫尾輪段', price: 600, color: '#3b82f6', desc: '當砂石經過斗子下料下來所承接的位置，下料衝擊點一般會加裝３～４支緩衝輪作為緩震作用。', fees:{repair:200, maint:80} },
+        { type: 'prop', name: '入庫機中段', price: 1000, color: '#3b82f6', desc: '輸送設備的核心桁架，一般設計10M為一段，帶運機前行輪設計間距為1M一組，回程輪為2M一組。', fees:{repair:350, maint:120} },
+        { type: 'prop', name: '入庫頭輪座', price: 900, color: '#3b82f6', desc: '帶運機的最頭端，頭輪座是整個輸送設備的帶動端上面安裝馬達及減速機來運轉皮帶。', fees:{repair:300, maint:110} },
+        { type: 'prop', name: '分料帶運機', price: 1500, color: '#a855f7', desc: '骨材會透過分料帶運機進行分倉作業，將骨材(粗砂、細砂、三分石、六分石)分別投入指定的倉別內進行存放。', fees:{repair:500, maint:200} },
+        { type: 'prop', name: '分料平台', price: 1200, color: '#a855f7', desc: '為八卦設計，主要用於維修分料帶運機的一個平台空間。', fees:{repair:400, maint:150}, upgrades:[{name:'上方走廊', price:1000, type:'addon'}] },
+        { type: 'special', name: '命運', icon: '❓', desc: '生產中的未知變數。', specialType: 'fate' },
+        { type: 'prop', name: '骨材庫', price: 3000, color: '#a855f7', desc: '四大主體之一，主要存放骨材的地方，骨材庫一般會有9M、10M、12M的設計選擇，會透過業主要求的容量進行層數的差異設計。', fees:{repair:1000, maint:400}, upgrades:[{name:'RC腳柱', price:2500, type:'choice'},{name:'鐵製腳柱', price:1500, type:'choice'}]},
+        { type: 'prop', name: '砂石閘門', price: 1300, color: '#a855f7', desc: '作為骨材下料時的開關閘門，砂閘門為弧形門設計，石閘門則為折角設計。砂閘門側板有中心挖空設計，避免含水砂子結塊。', fees:{repair:450, maint:150} },
+        { type: 'prop', name: '砂石計量桶', price: 2000, color: '#a855f7', desc: '計算砂子與石頭比重的設備，砂計量靠近末端襯底作為緩衝；石頭粒徑大內襯用耐磨板，砂子用白鐵或PE板。', fees:{repair:700, maint:250} },
+        { type: 'prop', name: '主尾輪座', price: 1100, color: '#f97316', desc: '帶運機的最末端，頭尾相連支撐整個帶運機的輸送皮帶。', fees:{repair:400, maint:150} },
+        { type: 'prop', name: '主尾輪段', price: 800, color: '#f97316', desc: '砂石衝擊位置，加裝３～４支緩衝輪緩震。', fees:{repair:300, maint:100} },
+        { type: 'prop', name: '主帶機中段', price: 1400, color: '#f97316', desc: '輸送設備核心桁架，10M一段，間距前1M後2M一組。', fees:{repair:500, maint:200} },
+        { type: 'prop', name: '主頭輪座', price: 1200, color: '#f97316', desc: '驅動端，安裝馬達及減速機來運轉皮帶。', fees:{repair:400, maint:150} },
+        { type: 'special', name: '休息室', icon: '☕', price: 1500, desc: '作業員休息與交班的場所。', fees:{repair:500, maint:200}, specialType: 'rest' },
+        { type: 'prop', name: '骨材待拌槽', price: 2200, color: '#06b6d4', desc: '主機樓內部骨材待命處，雙層設計可讓砂子做底緩衝石頭撞擊，延長主機壽命。', fees:{repair:750, maint:300}, upgrades:[{name:'單層式', price:1000, type:'choice'},{name:'雙層式', price:1800, type:'choice'}]},
+        { type: 'prop', name: '砂石滑槽', price: 1000, color: '#06b6d4', desc: '骨材銜接到拌合機內的槽體。', fees:{repair:300, maint:100} },
+        { type: 'prop', name: '水泥桶', price: 4000, color: '#06b6d4', desc: '裝載膠結材（水泥、飛灰、爐石）的儲存桶，一般廠區設計４～６顆。', fees:{repair:1500, maint:500}, upgrades:[{name:'桶上集塵機', price:1200, type:'addon'},{name:'手動蝶閥', price:600, type:'addon'}]},
+        { type: 'prop', name: '螺運機', price: 1800, color: '#06b6d4', desc: '輸送膠結材設備，透過螺旋送料。', fees:{repair:600, maint:200} },
+        { type: 'prop', name: '粉體計量桶', price: 2500, color: '#06b6d4', desc: '計算膠結材設備，本體一般使用白鐵設計。', fees:{repair:800, maint:300} },
+        { type: 'prop', name: '粉體滑槽', price: 800, color: '#06b6d4', desc: '透過插管銜接避免粉體外漏，計量銜接處安裝不織布管做緩衝。', fees:{repair:250, maint:80} },
+        { type: 'prop', name: '主機集塵機', price: 1800, color: '#06b6d4', desc: '吸取拌合機內粉塵，確保監控清晰。透過膜片閥震落回收粉塵。', fees:{repair:600, maint:200} },
+        { type: 'special', name: '機會', icon: '💡', desc: '工安獎勵或生產補助。', specialType: 'chance' },
+        { type: 'prop', name: '藥劑計量設備', price: 1600, color: '#06b6d4', desc: '計算藥劑比重，腐蝕性高故採白鐵設計，計量失敗經回收盒送回藥劑桶。', fees:{repair:500, maint:200}, upgrades:[{name: '藥劑暫存模組', price: 1200, type: 'addon'}] },
+        { type: 'prop', name: '清水桶', price: 1000, color: '#06b6d4', desc: '靠近拌合機的地方做儲存，用於加快生產效率。', fees:{repair:300, maint:100}, upgrades:[{name: '加裝: 冰水系統', price: 2000, type: 'addon'}] },
+        { type: 'prop', name: '主機汙水攪拌桶', price: 1800, color: '#06b6d4', desc: '汙水回收儲存空間，透過攪拌葉片防止淤泥附著，並具備灑水清洗系統。', fees:{repair:600, maint:250} },
+        { type: 'prop', name: '水計量桶', price: 1800, color: '#06b6d4', desc: '計算水類（清水、汙水、冰水）比重之設備。', fees:{repair:600, maint:200} },
+        { type: 'prop', name: '水緩衝桶', price: 1200, color: '#f43f5e', desc: '穩定入水流速。', fees:{repair:400, maint:150} },
+        { type: 'prop', name: '拌合機', price: 6000, color: '#f43f5e', desc: '工廠心臟。水平雙軸雙馬達型式，攪拌臂交錯混拌。三方主機一分鐘生產六方。', fees:{repair:2500, maint:800} },
+        { type: 'prop', name: '混凝土儲斗', price: 2500, color: '#f43f5e', desc: '混拌完成的儲存設備，在此等待可加快出車效率。', fees:{repair:800, maint:300}, upgrades:[{name: '加裝: 力霸式夾具', price: 3000, type: 'addon'}] }
+    ];
+
+    const CHANCE_LIST = [
+        { title: '工安違規', body: '進入現場未戴安全帽，罰款 $1500。', effect: -1500, icon: '👷' },
+        { title: '外派出差', body: '主管派至工地現場維修停留一回合，差旅費支出 $1000。', effect: -1000, icon: '💼' },
+        { title: '品質優良', body: '試體抗壓強度達標，獲頒廠區獎勵 $2500。', effect: 2500, icon: '🏆' },
+        { title: '設備更新', body: '申請政府環保設備補貼，獲得 $3000。', effect: 3000, icon: '🌿' }
+    ];
+
+    // --- 核心遊戲函數 ---
+
+    async function initGame() {
+        addLog("⚙️ 正在登錄廠區系統...");
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await auth.signInWithCustomToken(__initial_auth_token);
+            } else {
+                await auth.signInAnonymously();
+            }
+        } catch (e) {
+            addLog("❌ 登錄失敗，請重新整理頁面。");
+            console.error("Auth error", e);
+        }
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('user-info').innerText = `廠區代碼: ${user.uid.slice(0,8)}`;
+                addLog(`✅ 登錄成功 (作業員: ${user.uid.slice(0,4)})`);
+                joinGame(user.uid);
+                listenToGame();
+            }
+        });
+        renderBoard();
+    }
+
+    async function joinGame(uid) {
+        const pRef = db.doc(`artifacts/${appId}/public/data/players/${uid}`);
+        const snap = await pRef.get();
+        if (!snap.exists) {
+            await pRef.set({
+                uid: uid,
+                name: `作業員_${uid.slice(0,4)}`,
+                pos: 0,
+                balance: 15000,
+                color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+                owned_data: {}
+            });
+            addLog("📝 已建立個人生產帳戶");
+        }
+        
+        // 關鍵修復：確保 turn 存在
+        const sRef = db.doc(`artifacts/${appId}/public/data/state/main`);
+        const sSnap = await sRef.get();
+        if (!sSnap.exists || !sSnap.data().turn) {
+            await sRef.set({ turn: uid }, { merge: true });
+            addLog("🚩 您已被指派為當前作業導師");
+        }
+    }
+
+    function listenToGame() {
+        // 監聽全局狀態
+        db.doc(`artifacts/${appId}/public/data/state/main`).onSnapshot(doc => {
+            if (doc.exists) {
+                gameState.turn = doc.data().turn;
+                updateTurnUI();
+            }
+        }, err => addLog(`🚫 系統同步錯誤: ${err.message}`));
+
+        // 監聽玩家
+        db.collection(`artifacts/${appId}/public/data/players`).onSnapshot(snap => {
+            const listDiv = document.getElementById('players-list');
+            listDiv.innerHTML = '';
+            document.querySelectorAll('.player-token').forEach(el => el.remove());
+
+            snap.forEach(doc => {
+                const p = doc.data();
+                gameState.players[p.uid] = p;
+
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-2xl flex justify-between items-center text-[10px] shadow-sm border ${p.uid === currentUser.uid ? 'bg-blue-50 border-blue-200 font-black' : 'bg-white border-transparent'}`;
+                div.innerHTML = `<span><span style="color:${p.color}">●</span> ${p.name}</span><span>$${p.balance}</span>`;
+                listDiv.appendChild(div);
+
+                if (p.uid === currentUser.uid) {
+                    document.getElementById('player-balance').innerText = `$${p.balance}`;
+                }
+
+                const tile = document.querySelector(`[data-idx="${p.pos}"]`);
+                if (tile) {
+                    const token = document.createElement('div');
+                    token.className = 'player-token';
+                    token.style.backgroundColor = p.color;
+                    const offset = Object.keys(gameState.players).indexOf(p.uid) * 3;
+                    token.style.transform = `translate(${offset}px, ${offset}px)`;
+                    tile.appendChild(token);
+                }
+
+                if (p.owned_data) {
+                    Object.keys(p.owned_data).forEach(idx => {
+                        const el = document.querySelector(`[data-idx="${idx}"]`);
+                        if (el) { el.style.boxShadow = `inset 0 0 0 4px ${p.color}`; el.style.borderRadius = '8px'; }
+                    });
+                }
+            });
+        }, err => console.error("Players snapshot error", err));
+    }
+
+    function renderBoard() {
+        const board = document.getElementById('game-board');
+        board.innerHTML = '';
+        const side = 9;
+        const coords = [];
+        for (let x = 0; x < side; x++) coords.push({r: 1, c: x + 1});
+        for (let y = 1; y < side - 1; y++) coords.push({r: y + 1, c: side});
+        for (let x = side - 1; x >= 0; x--) coords.push({r: side, c: x + 1});
+        for (let y = side - 2; y >= 1; y--) coords.push({r: y + 1, c: 1});
+
+        INITIAL_TILES.forEach((data, idx) => {
+            const div = document.createElement('div');
+            const isSpecial = data.type === 'special';
+            const isStart = data.specialType === 'start';
+            div.className = `tile ${isSpecial ? 'tile-special' : ''} ${isStart ? 'tile-green' : (isSpecial ? 'tile-yellow' : '')}`;
+            div.dataset.idx = idx;
+            div.style.gridRow = coords[idx].r;
+            div.style.gridColumn = coords[idx].c;
+            if (!isSpecial) {
+                const header = document.createElement('div');
+                header.className = 'tile-header';
+                header.style.backgroundColor = data.color || '#3b82f6';
+                div.prepend(header);
+            }
+            const noDiv = document.createElement('div');
+            noDiv.className = 'tile-no';
+            noDiv.innerText = `#${idx + 1}`;
+            div.appendChild(noDiv);
+            
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'font-black px-1 mt-2 text-[8px] leading-tight break-words';
+            
+            if (data.name === "主機汙水攪拌桶") {
+                nameDiv.innerHTML = '主機汙水<br>攪拌桶';
+            } else if (data.name.length > 6) {
+                nameDiv.innerHTML = data.name.substring(0, 4) + '<br>' + data.name.substring(4);
+            } else {
+                nameDiv.innerText = data.name;
+            }
+            div.appendChild(nameDiv);
+
+            if (isStart) {
+                const label = document.createElement('div');
+                label.className = 'start-label';
+                label.innerText = '起點';
+                div.appendChild(label);
+            }
+            if (isSpecial && !isStart) {
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'text-xl mt-1 opacity-60';
+                iconDiv.innerText = data.icon;
+                div.appendChild(iconDiv);
+            } else if (!isSpecial && data.price) {
+                const priceDiv = document.createElement('div');
+                priceDiv.className = 'text-blue-500 font-bold mt-1 text-[7px] tracking-tight';
+                priceDiv.innerText = `$${data.price}`;
+                div.appendChild(priceDiv);
+            }
+            board.appendChild(div);
+        });
+
+        const center = document.createElement('div');
+        center.className = 'board-center';
+        center.innerHTML = `
+            <div class="text-slate-300 font-black text-6xl rotate-[-15deg] opacity-60 tracking-widest">LOOP</div>
+            <div class="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px] mt-6 bg-white/80 px-4 py-1 rounded-full border border-slate-200 text-center">BATCHING PLANT PRODUCTION SYSTEM</div>
+        `;
+        board.appendChild(center);
+    }
+
+    function updateTurnUI() {
+        const btn = document.getElementById('roll-btn');
+        const ind = document.getElementById('turn-indicator');
+        const isMy = gameState.turn === currentUser.uid;
+        btn.disabled = !isMy;
+        ind.innerText = isMy ? "您的操作回合" : "等待其他作業導師...";
+        ind.className = `px-8 py-3 rounded-full font-black text-sm shadow-sm transition-all tracking-wider ${isMy ? 'bg-yellow-400 text-slate-900 animate-pulse' : 'bg-slate-100 text-slate-400'}`;
+    }
+
+    document.getElementById('roll-btn').onclick = async () => {
+        const dice = Math.floor(Math.random() * 6) + 1;
+        addLog(`🎲 指令下達：前進 ${dice} 步驟`);
+        const p = gameState.players[currentUser.uid];
+        let nPos = (p.pos + dice) % INITIAL_TILES.length;
+        let bonus = (nPos < p.pos) ? 3000 : 0;
+        if (bonus) addLog(`🔄 全線循環完成，獲補助金 $${bonus}`);
+        await db.doc(`artifacts/${appId}/public/data/players/${currentUser.uid}`).update({ pos: nPos, balance: p.balance + bonus });
+        handleTile(nPos);
+    };
+
+    function handleTile(pos) {
+        const t = INITIAL_TILES[pos];
+        if (t.type === 'prop' || t.specialType === 'rest') {
+            let owner = null;
+            for (let id in gameState.players) { if (gameState.players[id].owned_data?.[pos]) { owner = gameState.players[id]; break; } }
+            if (!owner) showProp(pos, true);
+            else if (owner.uid === currentUser.uid) showProp(pos, false, true);
+            else triggerMaint(pos, owner);
+        } else if (t.type === 'special' && (t.specialType === 'fate' || t.specialType === 'chance')) { triggerChance(); }
+        else nextTurn();
+    }
+
+    function showProp(pos, buy = false, up = false) {
+        const t = INITIAL_TILES[pos];
+        const me = gameState.players[currentUser.uid];
+        const d = me.owned_data?.[pos] || { level: 1, upgrades: [] };
+        document.getElementById('prop-name').innerText = t.name;
+        document.getElementById('prop-price').innerText = `$${t.price || 0}`;
+        document.getElementById('prop-desc').innerText = t.desc;
+        document.getElementById('prop-level').innerText = `Lv.${d.level}`;
+        document.getElementById('prop-color').style.backgroundColor = (t.specialType === 'start' ? 'var(--start-green)' : (t.type === 'special' ? 'var(--chrome-yellow)' : (t.color || '#3b82f6')));
+        const m = 1 + (d.level - 1) * 0.4;
+        document.getElementById('prop-fee-repair').innerText = `-$${Math.round((t.fees?.repair || 0) * m)}`;
+        document.getElementById('prop-fee-maint').innerText = `-$${Math.round((t.fees?.maint || 0) * m)}`;
+        const actions = document.getElementById('prop-actions');
+        actions.innerHTML = '';
+        const upSection = document.getElementById('upgrade-section');
+        const upList = document.getElementById('upgrade-list');
+        upSection.classList.add('hidden');
+        if (buy) {
+            const b = document.createElement('button');
+            b.className = "flex-1 bg-blue-600 text-white py-5 rounded-[1.5rem] font-black shadow-lg hover:bg-blue-700 transition-all";
+            b.innerText = `購買設備 ($${t.price})`;
+            b.onclick = () => performBuy(pos);
+            actions.appendChild(b);
+        }
+        if (up && t.upgrades) {
+            upSection.classList.remove('hidden'); upList.innerHTML = '';
+            t.upgrades.forEach(u => {
+                const has = d.upgrades.includes(u.name);
+                const isChoice = u.type === 'choice';
+                const hasC = isChoice && d.upgrades.some(x => t.upgrades.find(y => y.name === x && y.type === 'choice'));
+                const stepLock = u.type === 'step' && d.level < u.levelReq;
+                const btn = document.createElement('button');
+                btn.className = `p-4 rounded-2xl border-2 flex justify-between items-center text-xs transition-all ${has ? 'bg-emerald-50 border-emerald-500 font-bold' : (hasC || stepLock ? 'opacity-30 grayscale border-slate-100' : 'bg-white border-slate-100 hover:border-blue-400')}`;
+                btn.disabled = has || hasC || stepLock;
+                btn.innerHTML = `<span>${u.name}</span><span class="font-black text-blue-600">${has ? '✓' : '$' + u.price}</span>`;
+                btn.onclick = () => performUp(pos, u);
+                upList.appendChild(btn);
+            });
+        }
+        const closeBtn = document.createElement('button');
+        closeBtn.className = "px-10 bg-slate-100 text-slate-600 py-5 rounded-[1.5rem] font-black hover:bg-slate-200";
+        closeBtn.innerText = "完成作業";
+        closeBtn.onclick = () => { closeModal('property-modal'); nextTurn(); };
+        actions.appendChild(closeBtn);
+        document.getElementById('property-modal').classList.add('active-modal');
+    }
+
+    async function performBuy(pos) {
+        const t = INITIAL_TILES[pos];
+        const me = gameState.players[currentUser.uid];
+        if (me.balance >= t.price) {
+            await updateBal(currentUser.uid, -t.price);
+            const od = me.owned_data || {}; od[pos] = { level: 1, upgrades: [] };
+            await db.doc(`artifacts/${appId}/public/data/players/${currentUser.uid}`).update({ owned_data: od });
+            addLog(`🏗️ 已取得 ${t.name} 管理權`);
+            closeModal('property-modal'); nextTurn();
+        } else showMsg('資本不足', '餘額不足。');
+    }
+
+    async function performUp(pos, up) {
+        const me = gameState.players[currentUser.uid];
+        if (me.balance >= up.price) {
+            await updateBal(currentUser.uid, -up.price);
+            const od = me.owned_data; od[pos].upgrades.push(up.name); od[pos].level += 1;
+            await db.doc(`artifacts/${appId}/public/data/players/${currentUser.uid}`).update({ owned_data: od });
+            addLog(`🛠️ 加裝配件：${INITIAL_TILES[pos].name} + ${up.name}`);
+            showProp(pos, false, true);
+        } else showMsg('資本不足', '餘額不足。');
+    }
+
+    async function handleSellCurrent() {
+        const me = gameState.players[currentUser.uid];
+        if (me.owned_data?.[me.pos]) {
+            const t = INITIAL_TILES[me.pos];
+            const ref = Math.round((t.price || 1000) * 0.7);
+            const od = me.owned_data; delete od[me.pos];
+            await db.doc(`artifacts/${appId}/public/data/players/${currentUser.uid}`).update({ balance: me.balance + ref, owned_data: od });
+            addLog(`💰 變賣資產：${t.name}`);
+            showMsg('變賣成功', `已回收 70% 資金：$${ref}`);
+        }
+    }
+
+    async function triggerMaint(pos, owner) {
+        const t = INITIAL_TILES[pos];
+        const od = owner.owned_data[pos];
+        const r = Math.random();
+        const m = 1 + (od.level - 1) * 0.4;
+        let fee = 0; let type = "生產穩定";
+        if (r < 0.3) { fee = Math.round((t.fees?.repair || 0) * m); type = "💥 故障緊急維修"; }
+        else if (r < 0.7) { fee = Math.round((t.fees?.maint || 0) * m); type = "🔧 定期保養"; }
+        if (fee > 0) {
+            await updateBal(currentUser.uid, -fee); await updateBal(owner.uid, fee);
+            showMsg(type, `進入他廠設備區，支付 $${fee} 維護費。`);
+        } else showMsg('順利生產', `${t.name} 目前運轉極佳，無需支付費用。`, '✅');
+        nextTurn();
+    }
+
+    async function triggerChance() {
+        const ev = CHANCE_LIST[Math.floor(Math.random() * CHANCE_LIST.length)];
+        showMsg(ev.title, ev.body, ev.icon);
+        await updateBal(currentUser.uid, ev.effect);
+        nextTurn();
+    }
+
+    async function updateBal(uid, amt) {
+        const r = db.doc(`artifacts/${appId}/public/data/players/${uid}`);
+        await db.runTransaction(async (t) => {
+            const s = await t.get(r);
+            t.update(r, { balance: s.data().balance + amt });
+        });
+    }
+
+    async function nextTurn() {
+        const ids = Object.keys(gameState.players).sort();
+        const nextId = ids[(ids.indexOf(gameState.turn) + 1) % ids.length];
+        await db.doc(`artifacts/${appId}/public/data/state/main`).update({ turn: nextId });
+    }
+
+    function addLog(m) {
+        const b = document.getElementById('game-logs');
+        const d = document.createElement('div');
+        d.className = "mb-3 border-l-4 border-blue-500 pl-4 text-[11px] py-1 bg-slate-800/50 rounded-r-lg";
+        d.innerHTML = `<span class="text-slate-400 font-bold">[${new Date().toLocaleTimeString()}]</span> ${m}`;
+        b.prepend(d);
+    }
+
+    function showMsg(t, b, i = '📢') {
+        document.getElementById('msg-title').innerText = t;
+        document.getElementById('msg-body').innerText = b;
+        document.getElementById('msg-icon').innerText = i;
+        document.getElementById('msg-modal').classList.add('active-modal');
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('active-modal'); }
+
+    // 初始化啟動
+    window.onload = initGame;
+</script>
+</body>
+</html>
