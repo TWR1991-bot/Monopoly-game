@@ -126,7 +126,6 @@
             text-transform: uppercase;
         }
 
-        /* 啟動畫板 */
         #setup-screen {
             position: fixed;
             inset: 0;
@@ -266,7 +265,7 @@
         { type: 'prop', name: '入庫頭輪座', price: 900, color: '#3b82f6', desc: '帶運機的最頭端，頭輪座是整個輸送設備的帶動端上面安裝馬達及減速機來運轉皮帶。', fees:{repair:300, maint:110} },
         { type: 'prop', name: '分料帶運機', price: 1500, color: '#a855f7', desc: '骨材會透過分料帶運機進行分倉作業，將骨材(粗砂、細砂、三分石、六分石)分別投入指定的倉別內進行存放。', fees:{repair:500, maint:200} },
         { type: 'prop', name: '分料平台', price: 1200, color: '#a855f7', desc: '為八卦設計，主要用於維修分料帶運機的一個平台空間。', fees:{repair:400, maint:150}, upgrades:[{name:'上方走廊', price:1000, type:'addon'}] },
-        { type: 'special', name: '命運', icon: '❓', desc: '生產中的未知變數。', specialType: 'fate' },
+        { type: 'special', name: '機會或命運', icon: '❓', desc: '生產中的未知變數。', specialType: 'chance_or_fate' },
         { type: 'prop', name: '骨材庫', price: 3000, color: '#a855f7', desc: '四大主體之一，主要存放骨材的地方，骨材庫一般會有9M、10M、12M的設計選擇，會透過業主要求的容量進行層數的差異設計。', fees:{repair:1000, maint:400}, upgrades:[{name:'RC腳柱', price:2500, type:'choice'},{name:'鐵製腳柱', price:1500, type:'choice'}]},
         { type: 'prop', name: '砂石閘門', price: 1300, color: '#a855f7', desc: '作為骨材下料時的開關閘門，砂閘門為弧形門設計，石閘門則為折角設計。砂閘門側板有中心挖空設計，避免含水砂子結塊。', fees:{repair:450, maint:150} },
         { type: 'prop', name: '砂石計量桶', price: 2000, color: '#a855f7', desc: '計算砂子與石頭比重的設備，砂計量靠近末端襯底作為緩衝；石頭粒徑大內襯用耐磨板，砂子用白鐵或PE板。', fees:{repair:700, maint:250} },
@@ -282,7 +281,7 @@
         { type: 'prop', name: '粉體計量桶', price: 2500, color: '#06b6d4', desc: '計算膠結材的一個設備，本體一般使用白鐵設計。', fees:{repair:800, maint:300} },
         { type: 'prop', name: '粉體滑槽', price: 800, color: '#06b6d4', desc: '計量結束後透過插管銜接避免粉體外漏，計量銜接處安裝不織布管做緩衝。', fees:{repair:250, maint:80} },
         { type: 'prop', name: '主機集塵機', price: 1800, color: '#06b6d4', desc: '吸取拌合機內粉塵，確保監控清晰。透過膜片閥震落回收粉塵。', fees:{repair:600, maint:200} },
-        { type: 'special', name: '機會', icon: '💡', desc: '工安獎勵或生產補助。', specialType: 'chance' },
+        { type: 'special', name: '機會或命運', icon: '❓', desc: '工安獎勵或生產補助。', specialType: 'chance_or_fate' },
         { type: 'prop', name: '藥劑計量設備', price: 1600, color: '#06b6d4', desc: '各種藥劑計算比重的設備，腐蝕性高採白鐵設計，計量失敗經回收盒送回藥劑桶。', fees:{repair:500, maint:200}, upgrades:[{name: '藥劑暫存模組', price: 1200, type: 'addon'}] },
         { type: 'prop', name: '清水桶', price: 1000, color: '#06b6d4', desc: '靠近拌合機的地方做儲存，用於加快生產效率。', fees:{repair:300, maint:100}, upgrades:[{name: '加裝: 冰水系統', price: 2000, type: 'addon'}] },
         { type: 'prop', name: '主機汙水攪拌桶', price: 1800, color: '#06b6d4', desc: '汙水回收利用的的儲存空間，會透過攪拌葉片隨時進行攪拌避免淤泥附著在桶身加速使用壽命，上面會加裝灑水系桶，定時在桶內進行噴灑清洗', fees:{repair:600, maint:250} },
@@ -292,11 +291,16 @@
         { type: 'prop', name: '混凝土儲斗', price: 2500, color: '#f43f5e', desc: '混拌完成的儲存設備，在此等待可加快出車效率。', fees:{repair:800, maint:300}, upgrades:[{name: '加裝: 力霸式夾具', price: 3000, type: 'addon'}] }
     ];
 
-    const CHANCE_LIST = [
-        { title: '工安違規', body: '進入現場未戴安全帽，罰款 $1500。', effect: -1500, icon: '👷' },
-        { title: '外派出差', body: '主管派至工地現場維修停留一回合，補貼不足支出 $1000。', effect: -1000, icon: '💼' },
-        { title: '品質優良', body: '試體抗壓強度達標，獲頒廠區品質獎金 $2500。', effect: 2500, icon: '🏆' },
-        { title: '節能減碳', body: '廠區優化電力回收模組，獲得營運補助 $3000。', effect: 3000, icon: '🌿' }
+    const CHANCE_EVENTS = [
+        { text: "老闆臨時外派出差，影響原有工作進度，暫停一回合", effect: (p) => { p.skipTurns = 1; }, icon: "💼" },
+        { text: "天氣轉涼，溫差變化大，導致生病發燒，在家休息停留一回合", effect: (p) => { p.skipTurns = 1; }, icon: "🤒" },
+        { text: "上班途中，機車故障導致遲到，事假扣錢200元", effect: (p) => { p.balance -= 200; }, icon: "🛵" },
+        { text: "去工地現場沒有配派安全帽，被檢舉扣錢500元", effect: (p) => { p.balance -= 500; }, icon: "👷" },
+        { text: "廠區巡檢時未注意設備，導致受傷故前往休息室休息，並停留一回合", effect: (p) => { p.pos = 16; p.skipTurns = 1; }, icon: "🩹" },
+        { text: "工地監工時未注意設備老舊，導致受傷故前往休息室休息，並停留一回合", effect: (p) => { p.pos = 16; p.skipTurns = 1; }, icon: "🏗️" },
+        { text: "老闆臨時外派業務出差，賺取加班費1500元", effect: (p) => { p.balance += 1500; }, icon: "💰" },
+        { text: "協助客戶進行設備搶修，賺取獎金1500元", effect: (p) => { p.balance += 1500; }, icon: "🔧" },
+        { text: "工作表現良好，賺取獎金500元", effect: (p) => { p.balance += 500; }, icon: "⭐" }
     ];
 
     // --- 遊戲邏輯 ---
@@ -313,7 +317,8 @@
                 pos: 0,
                 balance: 15000,
                 color: colors[i],
-                owned_data: {}
+                owned_data: {},
+                skipTurns: 0
             });
         }
         
@@ -411,7 +416,7 @@
             const div = document.createElement('div');
             const isCurrent = idx === currentTurnPlayerIdx;
             div.className = `p-3 rounded-2xl flex justify-between items-center text-[10px] shadow-sm border ${isCurrent ? 'bg-blue-50 border-blue-200 font-black' : 'bg-white border-transparent'}`;
-            div.innerHTML = `<span><span style="color:${p.color}">●</span> ${p.name}</span><span>$${p.balance}</span>`;
+            div.innerHTML = `<span><span style="color:${p.color}">●</span> ${p.name} ${p.skipTurns > 0 ? '(停留中)' : ''}</span><span>$${p.balance}</span>`;
             listDiv.appendChild(div);
 
             if (isCurrent) {
@@ -445,8 +450,18 @@
     }
 
     document.getElementById('roll-btn').onclick = () => {
-        const dice = Math.floor(Math.random() * 6) + 1;
         const p = players[currentTurnPlayerIdx];
+        
+        // 停等機制檢查
+        if (p.skipTurns > 0) {
+            p.skipTurns--;
+            addLog(`⏳ ${p.name} 正在出差/休息中，停留本回合`);
+            showMsg("停留中", `${p.name} 需停留一回合。`, "⏳");
+            nextTurn();
+            return;
+        }
+
+        const dice = Math.floor(Math.random() * 6) + 1;
         addLog(`🎲 ${p.name} 擲出了 ${dice} 點`);
         
         let newPos = (p.pos + dice) % INITIAL_TILES.length;
@@ -474,8 +489,8 @@
             } else {
                 triggerMaintenance(pos, owner);
             }
-        } else if (t.specialType === 'fate' || t.specialType === 'chance') {
-            triggerChanceEvent();
+        } else if (t.specialType === 'chance_or_fate') {
+            triggerChanceOrFateEvent();
         } else {
             nextTurn();
         }
@@ -584,13 +599,20 @@
         nextTurn();
     }
 
-    function triggerChanceEvent() {
-        const ev = CHANCE_LIST[Math.floor(Math.random() * CHANCE_LIST.length)];
+    function triggerChanceOrFateEvent() {
         const p = players[currentTurnPlayerIdx];
-        p.balance += ev.effect;
-        showMsg(ev.title, ev.body, ev.icon);
-        addLog(`💡 ${p.name} 觸發了 ${ev.title}`);
+        const ev = CHANCE_EVENTS[Math.floor(Math.random() * CHANCE_EVENTS.length)];
+        
+        // 執行事件效果
+        ev.effect(p);
+        
+        showMsg("機會或命運", ev.text, ev.icon);
+        addLog(`💡 ${p.name} 觸發：${ev.text}`);
+        
         updatePlayersUI();
+        // 如果事件沒有導致玩家移動，則直接換手（如果移動了，handleTile 會被 pos 變化觸發嗎？這裡單機版手動處理換手）
+        // 但因為受傷移動到休息室後，handleTile 可能會再次觸發（如果是在同一個函式內）。
+        // 為了簡單起見，顯示完訊息後由 nextTurn 接手。
         nextTurn();
     }
 
