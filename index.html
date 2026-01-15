@@ -222,17 +222,17 @@
         <div id="prop-desc" class="bg-slate-50 p-6 rounded-2xl text-sm text-slate-600 leading-relaxed border border-slate-100 mb-8 italic whitespace-pre-wrap">介紹內容載入中...</div>
         <div id="upgrade-section" class="mb-8 hidden">
             <p class="font-black text-slate-700 text-xs uppercase mb-3 tracking-widest flex items-center gap-2">
-                <span class="w-1 h-3 bg-yellow-400 rounded-full"></span> 升級配件與模組
+                <span class="w-1 h-3 bg-yellow-400 rounded-full"></span> 升級配件與模組 (提升等級增加路過維修費)
             </p>
             <div id="upgrade-list" class="space-y-3"></div>
         </div>
         <div class="grid grid-cols-2 gap-4 mb-8" id="prop-fees-container">
             <div class="p-4 bg-red-50 border border-red-100 rounded-2xl">
-                <p class="text-[9px] text-red-400 font-black uppercase mb-1 tracking-wider">故障維修 (30%)</p>
+                <p class="text-[9px] text-red-400 font-black uppercase mb-1 tracking-wider">故障維修支出</p>
                 <p id="prop-fee-repair" class="text-xl font-black text-red-600">-$0</p>
             </div>
             <div class="p-4 bg-orange-50 border border-orange-100 rounded-2xl">
-                <p class="text-[9px] text-orange-400 font-black uppercase mb-1 tracking-wider">定期保養 (40%)</p>
+                <p class="text-[9px] text-orange-400 font-black uppercase mb-1 tracking-wider">定期保養支出</p>
                 <p id="prop-fee-maint" class="text-xl font-black text-orange-600">-$0</p>
             </div>
         </div>
@@ -255,7 +255,7 @@
     let players = [];
     let currentTurnPlayerIdx = 0;
     
-    // --- 地圖資料定義 ---
+    // --- 地圖資料定義 (完整保留專業描述) ---
     const INITIAL_TILES = [
         { type: 'special', name: '中控室', color: '#10b981', desc: '全廠的大腦，負責調度、監控與配比管理。起點。', specialType: 'start' },
         { type: 'prop', name: '卡車卸料斗', price: 1200, color: '#3b82f6', desc: '砂石車卸料承接的斗子，透過震動機搭配篩網可以過篩沙子跟石頭讓顆粒不會過大。', fees:{repair:400, maint:150}, upgrades:[{name:'升級: 防塵屋', price:800, type:'step', levelReq:1},{name:'升級: 收料室', price:1200, type:'step', levelReq:2}]},
@@ -273,7 +273,7 @@
         { type: 'prop', name: '主尾輪段', price: 800, color: '#f97316', desc: '當砂石經過斗子下料下來所承接的位置，下料衝擊點一般會加裝３～４支緩衝輪作為緩震作用。', fees:{repair:300, maint:100} },
         { type: 'prop', name: '主帶機中段', price: 1400, color: '#f97316', desc: '輸送設備的核心桁架，一般設計10M為一段，帶運機前行輪設計間距為1M一組，回程輪為2M一組。', fees:{repair:500, maint:200} },
         { type: 'prop', name: '主頭輪座', price: 1200, color: '#f97316', desc: '帶運機的最頭端，頭輪座是整個輸送設備的帶動端上面安裝馬達及減速機來運轉皮帶。', fees:{repair:400, maint:150} },
-        { type: 'special', name: '休息室', icon: '☕', desc: '作業員休息與交班的場所。', specialType: 'rest' },
+        { type: 'special', name: '休息室', icon: '☕', price: 1500, desc: '作業員休息與交班的場所。', fees:{repair:500, maint:200}, specialType: 'rest' },
         { type: 'prop', name: '骨材待拌槽', price: 2200, color: '#06b6d4', desc: '是主機樓內部骨材待命處，雙層設計可讓砂子做底緩衝石頭撞擊，延長主機壽命。', fees:{repair:750, maint:300}, upgrades:[{name:'單層式', price:1000, type:'choice'},{name:'雙層式', price:1800, type:'choice'}]},
         { type: 'prop', name: '砂石滑槽', price: 1000, color: '#06b6d4', desc: '是骨材的銜接到拌合機內的一個槽體。', fees:{repair:300, maint:100} },
         { type: 'prop', name: '水泥桶', price: 4000, color: '#06b6d4', desc: '主要裝載膠結材（水泥、飛灰、爐石）的儲存桶，一般廠區設計４～６顆。', fees:{repair:1500, maint:500}, upgrades:[{name:'桶上集塵機', price:1200, type:'addon'},{name:'手動蝶閥', price:600, type:'addon'}]},
@@ -492,13 +492,11 @@
         } else if (t.specialType === 'chance_or_fate') {
             triggerChanceOrFateEvent();
         } else if (t.specialType === 'rest') {
-            // 如果不是從事件來的（正常走到），則觸發摸魚停留
             if (!fromEvent) {
                 p.skipTurns = 1;
                 showMsg("休息室", "用腦過度摸魚一下", "☕");
                 addLog(`⏳ ${p.name} 進入休息室摸魚，停留一回合`);
             } else {
-                // 如果是從事件來的，直接顯示訊息
                 addLog(`🩹 ${p.name} 已到達休息室進行休養`);
             }
             nextTurn();
@@ -510,7 +508,10 @@
     function showPropModal(pos, canBuy = false, canUpgrade = false) {
         const t = INITIAL_TILES[pos];
         const p = players[currentTurnPlayerIdx];
-        const d = p.owned_data[pos] || { level: 1, upgrades: [] };
+        
+        // 如果是別人的土地且沒被擁有，或者是自己的土地，才獲取數據
+        let ownerOfThis = players.find(player => player.owned_data[pos]);
+        const d = (ownerOfThis ? ownerOfThis.owned_data[pos] : null) || { level: 1, upgrades: [] };
         
         document.getElementById('prop-name').innerText = t.name;
         document.getElementById('prop-price').innerText = `$${t.price || 0}`;
@@ -518,7 +519,7 @@
         document.getElementById('prop-level').innerText = `Lv.${d.level}`;
         document.getElementById('prop-color').style.backgroundColor = (t.specialType === 'start' ? 'var(--start-green)' : (t.type === 'special' ? 'var(--chrome-yellow)' : (t.color || '#3b82f6')));
         
-        const m = 1 + (d.level - 1) * 0.4;
+        const m = 1 + (d.level - 1) * 0.5; // 每升一級增加 50% 費用
         document.getElementById('prop-fee-repair').innerText = `-$${Math.round((t.fees?.repair || 0) * m)}`;
         document.getElementById('prop-fee-maint').innerText = `-$${Math.round((t.fees?.maint || 0) * m)}`;
         
@@ -529,7 +530,6 @@
         const priceContainer = document.getElementById('prop-price-container');
         const feesContainer = document.getElementById('prop-fees-container');
         
-        // 隱藏非設備格的價格與維修費
         priceContainer.style.display = t.type === 'prop' ? 'flex' : 'none';
         feesContainer.style.display = t.type === 'prop' ? 'grid' : 'none';
 
@@ -538,7 +538,7 @@
         if (canBuy && p.balance >= t.price) {
             const b = document.createElement('button');
             b.className = "flex-1 bg-blue-600 text-white py-5 rounded-[1.5rem] font-black shadow-lg";
-            b.innerText = `購買 ($${t.price})`;
+            b.innerText = `投資設備 ($${t.price})`;
             b.onclick = () => { buyProp(pos); };
             actions.appendChild(b);
         }
@@ -555,7 +555,7 @@
                 const btn = document.createElement('button');
                 btn.className = `p-4 rounded-2xl border-2 flex justify-between items-center text-xs transition-all ${has ? 'bg-emerald-50 border-emerald-500 font-bold' : (hasC || stepLock ? 'opacity-30 grayscale cursor-not-allowed' : 'bg-white hover:border-blue-400')}`;
                 btn.disabled = has || hasC || stepLock;
-                btn.innerHTML = `<span>${u.name}</span><span class="font-black text-blue-600">${has ? '✓' : '$' + u.price}</span>`;
+                btn.innerHTML = `<span>${u.name}</span><span class="font-black text-blue-600">${has ? '已安裝' : '$' + u.price}</span>`;
                 btn.onclick = () => { upgradeProp(pos, u); };
                 upList.appendChild(btn);
             });
@@ -575,7 +575,7 @@
         const t = INITIAL_TILES[pos];
         p.balance -= t.price;
         p.owned_data[pos] = { level: 1, upgrades: [] };
-        addLog(`🏗️ ${p.name} 取得了 ${t.name} 的管理權`);
+        addLog(`🏗️ ${p.name} 投資了 ${t.name}`);
         closeModal('property-modal');
         updatePlayersUI();
         nextTurn();
@@ -584,10 +584,10 @@
     function upgradeProp(pos, upgrade) {
         const p = players[currentTurnPlayerIdx];
         if (p.balance >= upgrade.price) {
-            p.balance -= upgrade.price;
+            p.balance -= upgrade.price; // 扣除升級費用
             p.owned_data[pos].upgrades.push(upgrade.name);
             p.owned_data[pos].level += 1;
-            addLog(`🛠️ ${p.name} 加裝了 ${upgrade.name}`);
+            addLog(`🛠️ ${p.name} 支付 $${upgrade.price} 升級 ${INITIAL_TILES[pos].name} 至 Lv.${p.owned_data[pos].level}`);
             closeModal('property-modal');
             updatePlayersUI();
             nextTurn();
@@ -599,7 +599,7 @@
         const t = INITIAL_TILES[pos];
         const d = owner.owned_data[pos];
         const r = Math.random();
-        const m = 1 + (d.level - 1) * 0.4;
+        const m = 1 + (d.level - 1) * 0.5; // 每升一級，路過支付費用增加 50%
         let fee = 0; let type = "順利生產";
         
         if (r < 0.3) { fee = Math.round((t.fees?.repair || 0) * m); type = "💥 故障緊急維修"; }
@@ -608,8 +608,8 @@
         if (fee > 0) {
             p.balance -= fee;
             owner.balance += fee;
-            showMsg(type, `進入 ${owner.name} 的設備區，支付 $${fee} 之作業費用。`);
-            addLog(`💸 ${p.name} 支付了 $${fee} 給 ${owner.name}`);
+            showMsg(type, `進入 ${owner.name} 的 Lv.${d.level} 設備區，支付 $${fee} 之作業費用。`);
+            addLog(`💸 ${p.name} 支付了 $${fee} 維護費給 ${owner.name}`);
         } else {
             showMsg("順利生產", `${t.name} 目前運作狀況極佳，無需支付費用。`, '✅');
         }
@@ -622,7 +622,6 @@
         const oldPos = p.pos;
         const ev = CHANCE_EVENTS[Math.floor(Math.random() * CHANCE_EVENTS.length)];
         
-        // 執行事件效果
         ev.effect(p);
         
         showMsg("機會或命運", ev.text, ev.icon);
@@ -630,10 +629,7 @@
         
         updatePlayersUI();
 
-        // 判斷事件是否導致玩家順移到休息室 (index 16)
         if (p.pos === 16 && oldPos !== 16) {
-            // 從事件觸發過來的，不需要再觸發一次 handleTile 的摸魚逻辑
-            // 但需要讓地圖上的 Token 更新視覺位置
             updatePlayersUI();
             nextTurn();
         } else {
