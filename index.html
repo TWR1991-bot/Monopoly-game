@@ -168,7 +168,7 @@
                 <p class="text-[10px] text-emerald-500 font-black uppercase tracking-widest">當前玩家資金</p>
                 <div id="player-balance" class="text-3xl font-black text-emerald-700">$ --</div>
             </div>
-            <div id="turn-indicator" class="px-8 py-3 rounded-full font-black text-sm shadow-sm transition-all uppercase tracking-widest text-center">準備開始...</div>
+            <div id="turn-indicator" class="px-8 py-3 rounded-full font-black text-sm shadow-sm transition-all uppercase tracking-widest text-center text-white">準備開始...</div>
         </div>
     </header>
 
@@ -215,7 +215,7 @@
                 <p id="prop-level" class="text-2xl font-black text-blue-600">Lv.1</p>
             </div>
         </div>
-        <div class="flex items-center gap-3 mb-6">
+        <div class="flex items-center gap-3 mb-6" id="prop-price-container">
             <span class="bg-slate-100 px-3 py-1 rounded-lg text-[10px] font-black text-slate-500 uppercase tracking-widest">公司報價</span>
             <span id="prop-price" class="text-2xl font-black text-slate-700">$0</span>
         </div>
@@ -226,7 +226,7 @@
             </p>
             <div id="upgrade-list" class="space-y-3"></div>
         </div>
-        <div class="grid grid-cols-2 gap-4 mb-8">
+        <div class="grid grid-cols-2 gap-4 mb-8" id="prop-fees-container">
             <div class="p-4 bg-red-50 border border-red-100 rounded-2xl">
                 <p class="text-[9px] text-red-400 font-black uppercase mb-1 tracking-wider">故障維修 (30%)</p>
                 <p id="prop-fee-repair" class="text-xl font-black text-red-600">-$0</p>
@@ -255,7 +255,7 @@
     let players = [];
     let currentTurnPlayerIdx = 0;
     
-    // --- 地圖資料定義 (完整保留專業描述) ---
+    // --- 地圖資料定義 ---
     const INITIAL_TILES = [
         { type: 'special', name: '中控室', color: '#10b981', desc: '全廠的大腦，負責調度、監控與配比管理。起點。', specialType: 'start' },
         { type: 'prop', name: '卡車卸料斗', price: 1200, color: '#3b82f6', desc: '砂石車卸料承接的斗子，透過震動機搭配篩網可以過篩沙子跟石頭讓顆粒不會過大。', fees:{repair:400, maint:150}, upgrades:[{name:'升級: 防塵屋', price:800, type:'step', levelReq:1},{name:'升級: 收料室', price:1200, type:'step', levelReq:2}]},
@@ -273,7 +273,7 @@
         { type: 'prop', name: '主尾輪段', price: 800, color: '#f97316', desc: '當砂石經過斗子下料下來所承接的位置，下料衝擊點一般會加裝３～４支緩衝輪作為緩震作用。', fees:{repair:300, maint:100} },
         { type: 'prop', name: '主帶機中段', price: 1400, color: '#f97316', desc: '輸送設備的核心桁架，一般設計10M為一段，帶運機前行輪設計間距為1M一組，回程輪為2M一組。', fees:{repair:500, maint:200} },
         { type: 'prop', name: '主頭輪座', price: 1200, color: '#f97316', desc: '帶運機的最頭端，頭輪座是整個輸送設備的帶動端上面安裝馬達及減速機來運轉皮帶。', fees:{repair:400, maint:150} },
-        { type: 'special', name: '休息室', icon: '☕', price: 1500, desc: '作業員休息與交班的場所。', fees:{repair:500, maint:200}, specialType: 'rest' },
+        { type: 'special', name: '休息室', icon: '☕', desc: '作業員休息與交班的場所。', specialType: 'rest' },
         { type: 'prop', name: '骨材待拌槽', price: 2200, color: '#06b6d4', desc: '是主機樓內部骨材待命處，雙層設計可讓砂子做底緩衝石頭撞擊，延長主機壽命。', fees:{repair:750, maint:300}, upgrades:[{name:'單層式', price:1000, type:'choice'},{name:'雙層式', price:1800, type:'choice'}]},
         { type: 'prop', name: '砂石滑槽', price: 1000, color: '#06b6d4', desc: '是骨材的銜接到拌合機內的一個槽體。', fees:{repair:300, maint:100} },
         { type: 'prop', name: '水泥桶', price: 4000, color: '#06b6d4', desc: '主要裝載膠結材（水泥、飛灰、爐石）的儲存桶，一般廠區設計４～６顆。', fees:{repair:1500, maint:500}, upgrades:[{name:'桶上集塵機', price:1200, type:'addon'},{name:'手動蝶閥', price:600, type:'addon'}]},
@@ -281,7 +281,7 @@
         { type: 'prop', name: '粉體計量桶', price: 2500, color: '#06b6d4', desc: '計算膠結材的一個設備，本體一般使用白鐵設計。', fees:{repair:800, maint:300} },
         { type: 'prop', name: '粉體滑槽', price: 800, color: '#06b6d4', desc: '計量結束後透過插管銜接避免粉體外漏，計量銜接處安裝不織布管做緩衝。', fees:{repair:250, maint:80} },
         { type: 'prop', name: '主機集塵機', price: 1800, color: '#06b6d4', desc: '吸取拌合機內粉塵，確保監控清晰。透過膜片閥震落回收粉塵。', fees:{repair:600, maint:200} },
-        { type: 'special', name: '機會或命運', icon: '❓', desc: '工安獎勵或生產補助。', specialType: 'chance_or_fate' },
+        { type: 'special', name: '機會或命運', icon: '❓', desc: '生產中的未知變數。', specialType: 'chance_or_fate' },
         { type: 'prop', name: '藥劑計量設備', price: 1600, color: '#06b6d4', desc: '各種藥劑計算比重的設備，腐蝕性高採白鐵設計，計量失敗經回收盒送回藥劑桶。', fees:{repair:500, maint:200}, upgrades:[{name: '藥劑暫存模組', price: 1200, type: 'addon'}] },
         { type: 'prop', name: '清水桶', price: 1000, color: '#06b6d4', desc: '靠近拌合機的地方做儲存，用於加快生產效率。', fees:{repair:300, maint:100}, upgrades:[{name: '加裝: 冰水系統', price: 2000, type: 'addon'}] },
         { type: 'prop', name: '主機汙水攪拌桶', price: 1800, color: '#06b6d4', desc: '汙水回收利用的的儲存空間，會透過攪拌葉片隨時進行攪拌避免淤泥附著在桶身加速使用壽命，上面會加裝灑水系桶，定時在桶內進行噴灑清洗', fees:{repair:600, maint:250} },
@@ -455,8 +455,8 @@
         // 停等機制檢查
         if (p.skipTurns > 0) {
             p.skipTurns--;
-            addLog(`⏳ ${p.name} 正在出差/休息中，停留本回合`);
-            showMsg("停留中", `${p.name} 需停留一回合。`, "⏳");
+            addLog(`⏳ ${p.name} 恢復作業準備中，剩餘停留 ${p.skipTurns} 回合`);
+            showMsg("作業停留", `${p.name} 正在暫停中，本回合跳過。`, "⏳");
             nextTurn();
             return;
         }
@@ -475,11 +475,11 @@
         handleTile(newPos);
     };
 
-    function handleTile(pos) {
+    function handleTile(pos, fromEvent = false) {
         const t = INITIAL_TILES[pos];
         const p = players[currentTurnPlayerIdx];
         
-        if (t.type === 'prop' || (t.type === 'special' && t.name === '休息室')) {
+        if (t.type === 'prop') {
             let owner = players.find(player => player.owned_data[pos]);
             
             if (!owner) {
@@ -491,6 +491,17 @@
             }
         } else if (t.specialType === 'chance_or_fate') {
             triggerChanceOrFateEvent();
+        } else if (t.specialType === 'rest') {
+            // 如果不是從事件來的（正常走到），則觸發摸魚停留
+            if (!fromEvent) {
+                p.skipTurns = 1;
+                showMsg("休息室", "用腦過度摸魚一下", "☕");
+                addLog(`⏳ ${p.name} 進入休息室摸魚，停留一回合`);
+            } else {
+                // 如果是從事件來的，直接顯示訊息
+                addLog(`🩹 ${p.name} 已到達休息室進行休養`);
+            }
+            nextTurn();
         } else {
             nextTurn();
         }
@@ -515,6 +526,13 @@
         actions.innerHTML = '';
         const upSection = document.getElementById('upgrade-section');
         const upList = document.getElementById('upgrade-list');
+        const priceContainer = document.getElementById('prop-price-container');
+        const feesContainer = document.getElementById('prop-fees-container');
+        
+        // 隱藏非設備格的價格與維修費
+        priceContainer.style.display = t.type === 'prop' ? 'flex' : 'none';
+        feesContainer.style.display = t.type === 'prop' ? 'grid' : 'none';
+
         upSection.classList.add('hidden');
         
         if (canBuy && p.balance >= t.price) {
@@ -601,6 +619,7 @@
 
     function triggerChanceOrFateEvent() {
         const p = players[currentTurnPlayerIdx];
+        const oldPos = p.pos;
         const ev = CHANCE_EVENTS[Math.floor(Math.random() * CHANCE_EVENTS.length)];
         
         // 執行事件效果
@@ -610,10 +629,16 @@
         addLog(`💡 ${p.name} 觸發：${ev.text}`);
         
         updatePlayersUI();
-        // 如果事件沒有導致玩家移動，則直接換手（如果移動了，handleTile 會被 pos 變化觸發嗎？這裡單機版手動處理換手）
-        // 但因為受傷移動到休息室後，handleTile 可能會再次觸發（如果是在同一個函式內）。
-        // 為了簡單起見，顯示完訊息後由 nextTurn 接手。
-        nextTurn();
+
+        // 判斷事件是否導致玩家順移到休息室 (index 16)
+        if (p.pos === 16 && oldPos !== 16) {
+            // 從事件觸發過來的，不需要再觸發一次 handleTile 的摸魚逻辑
+            // 但需要讓地圖上的 Token 更新視覺位置
+            updatePlayersUI();
+            nextTurn();
+        } else {
+            nextTurn();
+        }
     }
 
     function handleSellCurrent() {
