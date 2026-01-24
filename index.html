@@ -166,6 +166,7 @@
 </head>
 <body class="p-2 md:p-6 text-slate-800">
 
+<!-- 遊戲初始設定畫面 -->
 <div id="setup-screen">
     <div class="bg-white p-12 rounded-[3rem] shadow-2xl text-center max-w-md w-full mx-4 border-b-8 border-yellow-400">
         <h1 class="text-4xl font-black text-slate-800 mb-2 italic">預拌廠大亨</h1>
@@ -227,6 +228,7 @@
     </div>
 </div>
 
+<!-- 設備資訊彈窗 -->
 <div id="property-modal" class="modal">
     <div class="bg-white rounded-[2.5rem] p-10 max-w-lg w-full mx-4 shadow-2xl relative overflow-hidden">
         <div id="prop-color" class="absolute top-0 left-0 w-full h-4"></div>
@@ -271,6 +273,7 @@
     </div>
 </div>
 
+<!-- 訊息視窗 -->
 <div id="msg-modal" class="modal">
     <div class="bg-white rounded-[3rem] p-12 max-w-md w-full mx-4 text-center shadow-2xl border border-slate-100">
         <div id="msg-icon" class="text-8xl mb-8">📢</div>
@@ -334,9 +337,18 @@
             {name:'更換: 陶瓷包膠', price:800, type:'step', levelReq:2, upgradeNote: '陶瓷包膠因材質關係與皮帶保持良好摩擦力，打滑程度大幅降低。一般直徑700以上頭輪均採此設計。'}
         ]},
         { type: 'special', name: '休息室', icon: '☕', price: 1500, desc: '作業員休息與交班的場所。', specialType: 'rest' },
-        { type: 'prop', name: '骨材待拌槽', price: 2200, color: '#06b6d4', desc: '是主機樓內部骨材待命處，雙層設計可讓砂子做底緩衝石頭撞擊，延長主機壽命。', fees:{repair:750, maint:300}, upgrades:[{name:'單層式', price:1000, type:'choice', upgradeNote: '構造簡單的標準型待拌槽。'},{name:'雙層式', price:1800, type:'choice', upgradeNote: '雙層結構提供緩衝，有效保護拌合主機壽命。'}]},
-        { type: 'prop', name: '砂石滑槽', price: 1000, color: '#06b6d4', desc: '是骨材的銜接到拌合機內的一個槽體。', fees:{repair:300, maint:100} },
-        { type: 'prop', name: '水泥桶', price: 4000, color: '#06b6d4', desc: '主要裝載膠結材（水泥、飛灰、爐石）的儲存桶，一般廠區設計４～６顆。', fees:{repair:1500, maint:500}, upgrades:[{name:'桶上集塵機', price:1200, type:'addon', upgradeNote: '過濾粉料充填時產生的空氣粉塵。'},{name:'手動蝶閥', price:600, type:'addon', upgradeNote: '提供手動切斷粉料供應的安全保障。'}]},
+        { type: 'prop', name: '骨材待拌槽', price: 2200, color: '#06b6d4', desc: '是主機樓內部骨材待命處，雙層設計可讓砂子做底緩衝石頭撞擊，延長主機壽命。', fees:{repair:750, maint:300}, upgrades:[
+            {name:'加購: 待拌槽雙邊走廊', price:800, type:'step', levelReq:1, upgradeNote: '雙邊走廊作為頭輪座的維修空間，減速機側加寬到1M左右讓人員能夠更方便維修保養。'},
+            {name:'更換: 雙層待拌槽', price:1500, type:'step', levelReq:2, upgradeNote: '優於單槽主要進料時讓砂料優先存在下待拌槽，石在上待拌槽。砂下料形成漿體可包覆拌和機攪拌臂，避免石頭直接撞擊損壞備品。'}
+        ]},
+        { type: 'prop', name: '砂石滑槽', price: 1000, color: '#06b6d4', desc: '是骨材的銜接到拌合機內的一個槽體。', fees:{repair:300, maint:100}, upgrades:[
+            {name:'加裝: 震動機', price:500, type:'step', levelReq:1, upgradeNote: '震動機可以有效加速下料過程，避免料體殘留或堆積。'},
+            {name:'加購: 滑槽維修走道', price:700, type:'step', levelReq:2, upgradeNote: '主要便於維修人員站在平台上維修更換待拌槽空壓缸，走道設計於天花板頂不影響二樓空間。'}
+        ]},
+        { type: 'prop', name: '水泥桶', price: 4000, color: '#06b6d4', desc: '主要裝載膠結材（水泥、飛灰、爐石）的儲存桶，一般廠區設計４～６顆。', fees:{repair:1500, maint:500}, upgrades:[
+            {name:'加購: 桶上集塵機', price:1200, type:'step', levelReq:1, upgradeNote: '用於吸取進料粉塵及釋放壓力避免爆桶。透過膜片閥充氣將布管粉塵震落回收重複使用。'},
+            {name:'加購: 手動蝶閥', price:600, type:'step', levelReq:2, upgradeNote: '作為水泥桶的閥門，可以控制下料量，若需更換下方設備時可將蝶閥完全關閉。'}
+        ]},
         { type: 'prop', name: '螺運機', price: 1800, color: '#06b6d4', desc: '一般用來輸送膠結材的設備，透過螺旋內頁進行送料。', fees:{repair:600, maint:200} },
         { type: 'prop', name: '粉體計量桶', price: 2500, color: '#06b6d4', desc: '計算膠結材的一個設備，本體一般使用白鐵設計。', fees:{repair:800, maint:300} },
         { type: 'prop', name: '粉體滑槽', price: 800, color: '#06b6d4', desc: '計量結束後透過插管銜接避免粉體外漏，計量銜接處安裝不織布管做緩衝。', fees:{repair:250, maint:80} },
@@ -363,7 +375,7 @@
         { text: "工作表現良好，賺取獎金500元", effect: (p) => { p.balance += 500; }, icon: "⭐" }
     ];
 
-    // --- 核心邏輯 ---
+    // --- 遊戲邏輯 ---
 
     function startGame(count) {
         const colors = ["#3b82f6", "#f43f5e", "#10b981", "#f59e0b"];
