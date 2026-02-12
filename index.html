@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>預拌廠大亨 - 大富翁4 經典風格版</title>
+    <title>預拌廠大富翁 - 大富翁4 經典風格版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 大富翁4 經典風格配色 */
@@ -86,6 +86,7 @@
             top: 0;
             left: 0;
             border-radius: 4px 4px 0 0;
+            z-index: 5;
         }
 
         .m4-btn {
@@ -111,6 +112,17 @@
             box-shadow: 0 4px 0 #133363;
         }
 
+        /* 修改：資產格編號文字變小 */
+        .tile-no {
+            position: absolute;
+            top: 6px;
+            left: 4px;
+            font-size: 6px;
+            color: #b0c4de;
+            font-weight: 800;
+            z-index: 10;
+        }
+
         .tile-level {
             position: absolute;
             top: 4px;
@@ -125,8 +137,8 @@
 
         /* 玩家棋子 */
         .player-token {
-            width: 26px;
-            height: 26px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             position: absolute;
             bottom: 4px;
@@ -136,8 +148,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         /* 模態視窗修正 */
@@ -187,7 +199,47 @@
             padding: 24px;
             background-image: radial-gradient(var(--m4-blue) 1px, transparent 1px);
             background-size: 20px 20px;
-            background-opacity: 0.05;
+        }
+
+        .rules-container {
+            text-align: left;
+            z-index: 10;
+            max-width: 85%;
+        }
+
+        .rules-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: #334155;
+            border-bottom: 2px solid var(--m4-blue);
+            display: inline-block;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .rule-item {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 4px;
+            line-height: 1.4;
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .rule-item::before { content: "▪"; color: var(--m4-blue); font-weight: bold; }
+
+        .loop-watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            font-size: 120px;
+            font-weight: 900;
+            color: rgba(42, 130, 228, 0.05);
+            pointer-events: none;
+            z-index: 1;
         }
     </style>
 </head>
@@ -196,18 +248,18 @@
 <!-- 遊戲初始設定畫面 -->
 <div id="setup-screen">
     <div class="m4-window text-center mx-4">
-        <div class="m4-header text-xl">預拌廠大亨 ‧ 夢想啟航</div>
+        <div class="m4-header text-xl">預拌廠大富翁 ‧ 夢想啟航</div>
         <div class="p-8">
-            <h1 class="text-3xl font-black text-blue-600 mb-2 italic">RICHMAN <span class="text-pink-500">4</span> STYLE</h1>
-            <p class="text-slate-500 font-bold mb-8 text-sm">請選擇一同創業的技術員人數</p>
+            <h1 class="text-3xl font-black text-blue-600 mb-2 italic">MARIO <span class="text-pink-500">x</span> RICHMAN</h1>
+            <p class="text-slate-500 font-bold mb-8 text-sm">請選擇一同參與營運的人物人數</p>
             
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="startGame(1)" class="m4-btn m4-btn-blue">1 人實習</button>
+                <button onclick="startGame(1)" class="m4-btn m4-btn-blue">孤軍奮戰</button>
                 <button onclick="startGame(2)" class="m4-btn">2 人競爭</button>
                 <button onclick="startGame(3)" class="m4-btn">3 人比拼</button>
                 <button onclick="startGame(4)" class="m4-btn">4 人聯賽</button>
                 <button onclick="startGame(5)" class="m4-btn">5 人團體</button>
-                <button onclick="startGame(6)" class="m4-btn m4-btn-blue">6 人滿員</button>
+                <button onclick="startGame(6)" class="m4-btn m4-btn-blue">6 人大滿貫</button>
             </div>
         </div>
     </div>
@@ -217,7 +269,7 @@
     <header class="flex flex-col lg:flex-row justify-between items-center mb-6 px-4">
         <div class="text-center lg:text-left">
             <div class="bg-white px-6 py-2 rounded-full border-4 border-blue-500 shadow-md inline-block">
-                <h1 class="text-2xl font-black text-blue-600 tracking-tighter">預拌廠大亨 <span class="text-pink-500 font-serif">BATCHING PLANT</span></h1>
+                <h1 class="text-2xl font-black text-blue-600 tracking-tighter">預拌廠大富翁 <span class="text-pink-500 font-serif">BATCHING PLANT</span></h1>
             </div>
         </div>
         
@@ -239,7 +291,7 @@
             </div>
             <div class="m4-panel overflow-hidden">
                 <div class="m4-header text-sm">營運日誌</div>
-                <div id="game-logs" class="log-box bg-slate-900 border-none rounded-none h-[250px]"></div>
+                <div id="game-logs" class="log-box bg-slate-900 border-none rounded-none h-[250px] overflow-y-auto p-3 text-[11px] font-mono text-slate-300"></div>
             </div>
         </div>
 
@@ -263,7 +315,7 @@
     <div class="m4-window">
         <div id="prop-m4-header" class="m4-header flex justify-between items-center">
             <span id="prop-name">設備資訊</span>
-            <span id="prop-level" class="bg-white/20 px-3 py-1 rounded-full text-xs">Lv.1</span>
+            <span id="prop-level-tag" class="bg-white/20 px-3 py-1 rounded-full text-xs">Lv.1</span>
         </div>
         <div class="p-8">
             <div id="prop-color-bar" class="h-2 w-full mb-4 rounded-full"></div>
@@ -276,7 +328,7 @@
                     <p class="text-[10px] text-green-600 font-black uppercase">堅固值</p>
                     <div class="flex items-center gap-2">
                         <div class="flex-1 h-3 bg-white rounded-full overflow-hidden border">
-                            <div id="prop-durability-bar" class="h-full bg-green-500"></div>
+                            <div id="prop-durability-bar" class="h-full bg-green-500 transition-all"></div>
                         </div>
                         <span id="prop-durability-text" class="text-xs font-black">100</span>
                     </div>
@@ -307,39 +359,50 @@
     </div>
 </div>
 
+<div id="msg-modal" class="modal">
+    <div class="m4-window">
+        <div class="m4-header">廠務通知</div>
+        <div class="p-8 text-center">
+            <div id="msg-icon" class="text-6xl mb-4">📢</div>
+            <h3 id="msg-title" class="text-xl font-black text-blue-800 mb-2">通知標題</h3>
+            <p id="msg-body" class="text-slate-500 mb-6 text-lg leading-relaxed"></p>
+            <div id="msg-custom-content" class="mb-6 hidden"></div>
+            <button id="msg-close-btn" onclick="closeModal('msg-modal')" class="m4-btn w-full">確認收悉</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let players = [];
     let currentTurnPlayerIdx = 0;
     let rollAgain = false;
 
-    // --- 載具定義 ---
-    const VEHICLE_POOL = [
-        { name: "預拌車", icon: "🚛" },
-        { name: "水泥車", icon: "🚚" },
-        { name: "砂石車", icon: "🚜" },
-        { name: "轎車", icon: "🚗" },
-        { name: "貨車", icon: "🚐" },
-        { name: "堆高機", icon: "⚙️" },
-        { name: "山貓", icon: "🏗️" }
+    // --- 修改：馬力歐角色定義 ---
+    const CHARACTER_POOL = [
+        { name: "瑪利歐", icon: "👨‍🔧", color: "#FF0000" },
+        { name: "路易吉", icon: "👨‍🔧", color: "#00FF00" },
+        { name: "碧姬公主", icon: "👸", color: "#FF69B4" },
+        { name: "耀西", icon: "🦖", color: "#32CD32" },
+        { name: "奇諾比奧", icon: "🍄", color: "#FFFFFF" },
+        { name: "庫巴", icon: "🐢", color: "#FFA500" }
     ];
 
-    // --- 地圖資料定義 (36格) ---
     const INITIAL_TILES = [
         { type: 'special', name: '中控室', color: '#10b981', desc: '全廠的大腦，負責調度、監控與配比管理。起點接口。', specialType: 'start' },
-        { type: 'prop', name: '卡車卸料斗', price: 850, color: '#3b82f6', desc: '砂石車卸料承接的斗子，上面安裝篩網可將骨材震動過篩結塊分散。', fees:{repair:250, maint:85}, upgrades:[{name:'升級: 防塵屋', price:250, type:'step', levelReq:1, upgradeNote: '防塵屋有效阻隔卸料時產生的揚塵。'},{name:'升級: 收料室', price:550, type:'step', levelReq:2, upgradeNote: '收料室用於砂石車進料時進行料量核對的地方。'}]},
+        { type: 'prop', name: '卡車卸料斗', price: 850, color: '#3b82f6', desc: 砂石車卸料承接的斗子，上面安裝篩網可將骨材震動過篩結塊分散。', fees:{repair:250, maint:85}, upgrades:[{name:'升級: 防塵屋', price:250, type:'step', levelReq:1, upgradeNote: '防塵屋有效阻隔卸料時產生的揚塵。'},{name:'升級: 收料室', price:550, type:'step', levelReq:2, upgradeNote: '完整的收料室結構，提供最佳的環境維護與收料效率。'}]},
         { type: 'prop', name: '入庫尾輪座', price: 370, color: '#3b82f6', desc: '帶運機末端支撐輸送皮帶。', fees:{repair:110, maint:35}, upgrades:[{name:'加購: 尾輪保護網', price:150, type:'step', levelReq:1, upgradeNote: '有效防止人員直接觸碰輸送中的皮帶。'},{name:'更換: UKT系列軸承', price:200, type:'step', levelReq:2, upgradeNote: '太陽鎖片設計，拆裝較好施作。'}]},
-        { type: 'prop', name: '入庫尾輪段', price: 450, color: '#3b82f6', desc: '主要下料承接處，一般會安裝3~4組的拖架緩衝滾稐。', fees:{repair:135, maint:45}, upgrades:[{name:'加購: 整流板', price:150, type:'step', levelReq:1},{name:'加購: 三角皮帶清潔器', price:200, type:'step', levelReq:2}]},
+        { type: 'prop', name: '入庫尾輪段', price: 450, color: '#3b82f6', desc: '主要下料承接處，一般會安裝3~4組的拖架緩衝滾輪。', fees:{repair:135, maint:45}, upgrades:[{name:'加購: 整流板', price:150, type:'step', levelReq:1},{name:'加購: 三角皮帶清潔器', price:200, type:'step', levelReq:2}]},
         { type: 'prop', name: '入庫機中段', price: 650, color: '#3b82f6', desc: '輸送設備的核心桁架，10Ｍ為1截，上層每1M會安裝1組前行輪，桁架中曾每2M安裝1組回程輪，底層安裝水槽承接砂石。', fees:{repair:200, maint:65}, upgrades:[{name:'加購: 雙側保護網', price:250, type:'step', levelReq:1},{name:'加購: 安全拉繩', price:300, type:'step', levelReq:2}]},
         { type: 'prop', name: '入庫頭輪座', price: 3000, color: '#3b82f6', desc: '整條帶運機的帶動核心，安裝馬達及減速機來運轉皮帶。', fees:{repair:900, maint:300}, upgrades:[{name:'升級: 錐套式減速機', price:600, type:'step', levelReq:1},{name:'更換: 陶瓷包膠', price:800, type:'step', levelReq:2}]},
         
-        { type: 'special', name: '運動場', color: '#fef9c3', icon: '🏃', desc: '廠區休閒運動空間。', specialType: 'sports' },
+        { type: 'special', name: '運動場', color: '#fef9c3', icon: '🏃', desc: '看看你的小腹，還不趕快去運動。', specialType: 'sports' },
         
         { type: 'prop', name: '分料帶運機', price: 500, color: '#a855f7', desc: '骨材分倉作業設備，儀控式收到物料種類會將分料旋轉到指定倉別等待入料，分料帶運機就像一條濃縮版的輸送帶，所有的帶運機物件都安裝在這一小台上面。', fees:{repair:150, maint:50}, upgrades:[{name:'加購: 分料旋轉座', price:350, type:'step', levelReq:1}]},
-        { type: 'prop', name: '分料平台', price: 400, color: '#a855f7', desc: '為八卦設計，用於維修分料機平台空間。', fees:{repair:120, maint:40}, upgrades:[{name:'加購: 上方走廊', price:250, type:'step', levelReq:1}]},
+        { type: 'prop', name: '分料平台', price: 400, color: '#a855f7', desc: '為八卦設計，用於維修分料機的平台空間。', fees:{repair:120, maint:40}, upgrades:[{name:'加購: 上方走廊', price:250, type:'step', levelReq:1}]},
         { type: 'special', name: '機會或命運', icon: '❓', desc: '生產中的未知變數。', specialType: 'chance_or_fate' },
-        { type: 'prop', name: '骨材庫', price: 5400, color: '#a855f7', desc: '主要存放骨材的地方，規格有9M、10M、12M，會依據業主存量需求增加層數與倉數。', fees:{repair:1600, maint:540}, upgrades:[{name:'安裝: 鐵製腳柱', price:895, type:'choice'},{name:'安裝: RC腳柱', price:1200, type:'choice'},{name:'加購: 骨材庫鐵屋', price:1350, type:'step', levelReq:2}]},
+        { type: 'prop', name: '骨材庫', price: 5400, color: '#a855f7', desc: '主要存放骨材的地方，規格有9M、10M、12M，會依據業主存量需求增加層數與倉數。', fees:{repair:1600, maint:540}, upgrades:[{name:'安裝: 鐵製腳柱', price:895, type:'choice', upgradeNote: '鐵製腳柱設計上較有整體性，一面四支。'},{name:'安裝: RC腳柱', price:1200, type:'choice', upgradeNote: '一般RC腳柱乘載力佳，但下方維修空間小。'},{name:'加購: 骨材庫鐵屋', price:1350, type:'step', levelReq:2, upgradeNote: '用於包覆骨材倉上方避免風吹日曬雨淋。'}]},
         { type: 'prop', name: '砂石閘門', price: 70, color: '#a855f7', desc: '骨材庫的下料開關閘門，從外型來看閘門為圓弧形的是砂閘門，折角形的是石閘門。', fees:{repair:20, maint:10} },
-        { type: 'prop', name: '砂石計量桶', price: 500, color: '#a855f7', desc: '計算砂子與石頭比重的設備，砂計量靠近末端襯底，每立方的混凝土約搭配砂石各900kg的骨材', fees:{repair:150, maint:50} },
+        { type: 'prop', name: '砂石計量桶', price: 500, color: '#a855f7', desc: '計算砂子與石頭比重的設備，砂計量靠近末端襯底，每立方的混凝土約搭配砂石各900kg的骨材。', fees:{repair:150, maint:50} },
         
         { type: 'special', name: '銀行', color: '#fef9c3', icon: '🏦', desc: '廠區財務中心，可借貸服務。', specialType: 'bank' },
         
@@ -347,28 +410,28 @@
         { type: 'prop', name: '主尾輪段', price: 400, color: '#f97316', desc: '主要下料承接處，一般會安裝3~4組的拖架緩衝滾輪。', fees:{repair:120, maint:40}, upgrades:[{name:'加購: 整流板', price:150, type:'step', levelReq:1},{name:'加購: 三角皮帶清潔器', price:200, type:'step', levelReq:2}]},
         { type: 'prop', name: '主帶機中段', price: 620, color: '#f97316', desc: '輸送設備的核心桁架，10Ｍ為1截，上層每1M會安裝1組前行輪，桁架中曾每2M安裝1組回程輪，底層安裝水槽承接砂石。', fees:{repair:180, maint:60}, upgrades:[{name:'加購: 雙側保護網', price:250, type:'step', levelReq:1},{name:'加購: 安全拉繩', price:300, type:'step', levelReq:2}]},
         { type: 'prop', name: '主頭輪座', price: 2200, color: '#f97316', desc: '整條帶運機的帶動核心，安裝馬達及減速機來運轉皮帶。', fees:{repair:660, maint:220}, upgrades:[{name:'升級: 錐套式減速機', price:600, type:'step', levelReq:1},{name:'更換: 陶瓷包膠', price:800, type:'step', levelReq:2}]},
-        { type: 'special', name: '休息室', icon: '☕', price: 1500, desc: '技術員休息交班空間。', specialType: 'rest' },
-        { type: 'prop', name: '骨材待拌槽', price: 300, color: '#06b6d4', desc: '骨材在主機樓內部待命處。', fees:{repair:90, maint:30}, upgrades:[{name:'加購: 待拌槽雙邊走廊', price:200, type:'step', levelReq:1},{name:'更換: 雙層待拌槽', price:450, type:'step', levelReq:2}]},
-        { type: 'prop', name: '砂石滑槽', price: 200, color: '#06b6d4', desc: '骨材進到拌合機的銜接槽體。', fees:{repair:60, maint:20}, upgrades:[{name:'加裝: 震動機', price:150, type:'step', levelReq:1},{name:'加購: 滑槽維修走道', price:200, type:'step', levelReq:2}]},
+        { type: 'special', name: '休息室', icon: '☕', price: 1500, desc: '合理的摸魚是上班的動力。', specialType: 'rest' },
+        { type: 'prop', name: '骨材待拌槽', price: 300, color: '#06b6d4', desc: '骨材在主機樓內部待命處。', fees:{repair:90, maint:30}, upgrades:[{name:'加購: 待拌槽雙邊走廊', price:200, type:'step', levelReq:1},{name:'更換: 雙層待拌槽', price:450, type:'step', levelReq:2, upgradeNote: '雙層設計可讓砂子下料混拌形成漿體包覆葉片，保護備品。'}]},
+        { type: 'prop', name: '砂石滑槽', price: 200, color: '#06b6d4', desc: '骨材進到拌合機的銜接槽體。', fees:{repair:60, maint:20}, upgrades:[{name:'加裝: 震動機', price:150, type:'step', levelReq:1, upgradeNote: '震動機可以有效加速下料，避免殘留。'},{name:'加購: 滑槽維修走道', price:200, type:'step', levelReq:2, upgradeNote: '便於維修更換待拌槽空壓缸。'}]},
         
-        { type: 'special', name: '洗手間', color: '#fef9c3', icon: '🚻', desc: '公共衛生空間。', specialType: 'restroom' },
+        { type: 'special', name: '洗手間', color: '#fef9c3', icon: '🚻', desc: '不要隨地大小便。', specialType: 'restroom' },
         
-        { type: 'prop', name: '水泥桶', price: 2150, color: '#64748b', desc: '裝載膠結材（水泥、飛灰、爐石）的儲存桶，每顆桶存放一種物料', fees:{repair:645, maint:215}, upgrades:[{name:'加購: 桶上集塵機', price:400, type:'step', levelReq:1},{name:'加購: 手動蝶閥', price:250, type:'step', levelReq:2}]},
+        { type: 'prop', name: '水泥桶', price: 2150, color: '#64748b', desc: '裝載膠結材（水泥、飛灰、爐石）的儲存桶，每顆桶存放一種物料。', fees:{repair:645, maint:215}, upgrades:[{name:'加購: 桶上集塵機', price:400, type:'step', levelReq:1, upgradeNote: '吸取進料粉塵及釋放壓力避免爆桶。'},{name:'加購: 手動蝶閥', price:250, type:'step', levelReq:2, upgradeNote: '手動蝶閥可控制料出的量，便於更換設備。'}]},
         { type: 'prop', name: '螺運機', price: 380, color: '#64748b', desc: '膠結材的輸送設備，內部使用螺旋葉片設計。', fees:{repair:110, maint:40} },
         { type: 'prop', name: '粉體計量桶', price: 350, color: '#64748b', desc: '計算膠結材比重，每立方的混凝土約搭配200kg的水泥和各100kg的飛灰、爐石。', fees:{repair:100, maint:35} },
         { type: 'prop', name: '粉體滑槽', price: 150, color: '#64748b', desc: '粉體進入拌合機的銜接設備，中間使用插管搭配不知不管做銜接設計，防止粉塵外溢。', fees:{repair:45, maint:15} },
         { type: 'prop', name: '主機集塵機', price: 500, color: '#06b6d4', desc: '主要吸取拌合機內的粉塵，透過膜片閥充氣將布管粉塵吹落後回收再利用。', fees:{repair:150, maint:50} },
-        { type: 'special', name: '機會或命運', icon: '❓', desc: '生產中的未知變數。', specialType: 'chance_or_fate' },
-        { type: 'prop', name: '藥劑計量設備', price: 180, color: '#06b6d4', desc: '藥劑比重計算設備，每立方混凝土約搭配5kg的藥劑', fees:{repair:55, maint:18} },
-        { type: 'prop', name: '清水桶', price: 280, color: '#06b6d4', desc: '位於主機內部的清水儲存系統，作為一個中轉站提升生產效率', fees:{repair:85, maint:28}, upgrades:[{name: '加裝: 冰水系統', price: 350, type: 'addon'}]},
+        { type: 'special', name: '機會或命運', icon: '❓', desc: '廠區突發狀況。', specialType: 'chance_or_fate' },
+        { type: 'prop', name: '藥劑計量設備', price: 180, color: '#06b6d4', desc: '藥劑比重計算設備，每立方混凝土約搭配5kg的藥劑。', fees:{repair:55, maint:18} },
+        { type: 'prop', name: '清水桶', price: 280, color: '#06b6d4', desc: '位於主機內部的清水儲存系統，作為一個中轉站提升生產效率。', fees:{repair:85, maint:28}, upgrades:[{name: '加裝: 冰水系統', price: 350, type: 'addon'}]},
         { type: 'prop', name: '主機汙水攪拌桶', price: 300, color: '#06b6d4', desc: '汙水在主機樓的暫存設備，內部使用攪拌設計，讓淤泥不會沉澱造成結塊，桶子上面加裝灑水系統可有限的將桶內壁的淤泥洗落減少附著狀況。', fees:{repair:90, maint:30} },
         { type: 'prop', name: '水計量桶', price: 260, color: '#06b6d4', desc: '計算水類比例，每立方的混凝土約搭配150kg的水(包含清水、汙水、冰水)。', fees:{repair:75, maint:26} },
         
-        { type: 'special', name: '醫護室', color: '#fef9c3', icon: '🏥', desc: '急救與檢查站。', specialType: 'infirmary' },
+        { type: 'special', name: '醫護室', color: '#fef9c3', icon: '🏥', desc: '跌打損傷通通都醫。', specialType: 'infirmary' },
         
         { type: 'prop', name: '水緩衝桶', price: 300, color: '#f43f5e', desc: '出水時的一個緩衝空間。', fees:{repair:90, maint:30} },
-        { type: 'prop', name: '拌合機', price: 3300, color: '#f43f5e', desc: '預拌廠的心臟，主要用於混拌所有原物料，每分鐘可產出３方的混凝土，轉速每分鐘可繳拌23~26下', fees:{repair:1000, maint:330} },
-        { type: 'prop', name: '混凝土儲斗', price: 800, color: '#f43f5e', desc: '混凝土暫存儲槽，一般設計七方可容納依台預拌車承載的量。', fees:{repair:240, maint:80}, upgrades:[{name: '加裝: 力霸式夾具', price: 150, type: 'step', levelReq: 1},{name: '加裝: 儲斗維修平台', price: 150, type: 'step', levelReq: 2}]}
+        { type: 'prop', name: '拌合機', price: 3300, color: '#f43f5e', desc: '預拌廠的心臟，主要用於混拌所有原物料，每分鐘可產出３方的混凝土，轉速每分鐘可繳拌23~26下。', fees:{repair:1000, maint:330} },
+        { type: 'prop', name: '混凝土儲斗', price: 800, color: '#f43f5e', desc: '混凝土最終成品暫存槽，容量設計一般為7方，可配合一台預拌車出車。', fees:{repair:240, maint:80}, upgrades:[{name: '加裝: 力霸式夾具', price: 150, type: 'step', levelReq: 1},{name: '加裝: 儲斗維修平台', price: 150, type: 'step', levelReq: 2, upgradeNote: '提供維修更換備品時的站立空間與安全圍欄。'}]}
     ];
 
     const CHANCE_EVENTS = [
@@ -399,19 +462,20 @@
     // --- 核心邏輯 ---
 
     function startGame(count) {
-        const colors = ["#3b82f6", "#f43f5e", "#10b981", "#f59e0b", "#a855f7", "#06b6d4"];
-        const names = ["技術員 A", "技術員 B", "技術員 C", "技術員 D", "技術員 E", "技術員 F"];
-        const shuffledVehicles = [...VEHICLE_POOL].sort(() => Math.random() - 0.5);
+        // 隨機分配馬力歐角色
+        const shuffledHeroes = [...CHARACTER_POOL].sort(() => Math.random() - 0.5);
         
         players = [];
         for (let i = 0; i < count; i++) {
+            const hero = shuffledHeroes[i % shuffledHeroes.length];
             players.push({
-                id: i, name: names[i], pos: 0, balance: 15000, color: colors[i],
-                vehicle: shuffledVehicles[i % shuffledVehicles.length],
+                id: i, name: hero.name, pos: 0, balance: 15000, color: hero.color,
+                avatar: hero.icon,
                 owned_data: {}, skipTurns: 0, skipImmunity: 0, feeImmunity: false,
                 loanDebt: 0, loanInstallments: 0
             });
         }
+        currentTurnPlayerIdx = 0;
         document.getElementById('setup-screen').style.display = 'none';
         initGame();
     }
@@ -420,6 +484,7 @@
         renderBoard();
         updatePlayersUI();
         updateTurnUI();
+        addLog("🏭 廠區生產循環啟動 - 預拌廠大富翁");
     }
 
     function renderBoard() {
@@ -512,9 +577,11 @@
             <div class="loop-watermark">LOOP</div>
             <div class="rules-container">
                 <h4 class="rules-title">廠區營運手冊</h4>
-                <p class="rule-item">銀行借貸：可申貸，通過起點還款 20%，5 期償清。</p>
-                <p class="rule-item">堅固值：Lv3 設備每停留扣 2 點，歸零停收維修費。</p>
-                <p class="rule-item">健檢：停留自家房產滿 3/6/12 次，免費回升 5 點。</p>
+                <p class="rule-item">銀行借貸：可申貸總資產 80%，經起點分 5 期自動扣還。</p>
+                <p class="rule-item">升級：標示邊框隨等級擴張 (Lv1:上右, Lv2:上右下, Lv3:全包)。</p>
+                <p class="rule-item">堅固值：最高級設備每停留扣 2 點。低於 50% 維修費減半。</p>
+                <p class="rule-item">336 健檢：房主停留自己資產滿 3/6/12 次，免費回升 5 點堅固。</p>
+                <p class="rule-item">專業格：運動場、休息室、洗手間、醫護室觸發多樣隨機事件。</p>
             </div>
         `;
         board.appendChild(center);
@@ -532,10 +599,10 @@
             div.className = `p-3 rounded-lg flex flex-col gap-1 text-[10px] shadow border-2 ${isCurrent ? 'bg-white border-blue-400 font-black' : 'bg-slate-50 border-transparent opacity-80'}`;
             div.innerHTML = `
                 <div class="flex justify-between items-center">
-                    <span><span style="color:${p.color}">●</span> ${p.vehicle.icon} ${p.name}</span>
+                    <span><span style="color:${p.color}">●</span> ${p.avatar} ${p.name}</span>
                     <span>$${p.balance}</span>
                 </div>
-                ${p.loanDebt > 0 ? `<div class="text-[9px] text-rose-500 font-bold">欠款: $${Math.round(p.loanDebt)}</div>` : ''}
+                ${p.loanDebt > 0 ? `<div class="text-[9px] text-rose-500 font-bold">還款中: $${Math.round(p.loanDebt)}</div>` : ''}
             `;
             listDiv.appendChild(div);
 
@@ -546,8 +613,10 @@
                 const token = document.createElement('div');
                 token.className = 'player-token';
                 token.style.backgroundColor = p.color;
-                token.innerText = p.vehicle.icon;
-                token.style.transform = `translate(${idx * 4}px, ${idx * 4}px)`;
+                token.innerText = p.avatar;
+                const offsetX = (idx % 3) * 6 - 6;
+                const offsetY = Math.floor(idx / 3) * 6 - 6;
+                token.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
                 tile.appendChild(token);
             }
 
@@ -568,7 +637,7 @@
         const p = players[currentTurnPlayerIdx];
         if (!p) return;
         const ind = document.getElementById('turn-indicator');
-        ind.innerText = rollAgain ? `${p.vehicle.icon} ${p.name} 乘勝追擊！` : `輪到 ${p.name}`;
+        ind.innerText = rollAgain ? `${p.avatar} ${p.name} 乘勝追擊！` : `輪到 ${p.name}`;
         ind.style.backgroundColor = p.color;
     }
 
@@ -578,6 +647,7 @@
 
         if (p.skipTurns > 0) {
             p.skipTurns--;
+            addLog(`⏳ ${p.name} 停留中...`);
             showMsg("作業停留", `${p.name} 需停留作業。`, "⏳");
             nextTurn();
             return;
@@ -591,13 +661,14 @@
         
         if (newPos < oldPos) {
             p.balance += 2500;
+            addLog(`🔄 ${p.name} 通過起點，獲得獎金 $2500`);
             if (p.loanDebt > 0) {
                 let repayment = Math.round(p.loanDebt / p.loanInstallments);
                 p.balance -= repayment;
                 p.loanDebt -= repayment;
                 p.loanInstallments--;
                 if (p.loanInstallments <= 0) p.loanDebt = 0;
-                addLog(`🏦 銀行還款：$${repayment}`);
+                addLog(`🏦 銀行自動扣款：$${repayment}`);
             }
         }
         
@@ -629,7 +700,7 @@
             owner.owned_data[pos].visitCount++;
             if ([3, 6, 12].includes(owner.owned_data[pos].visitCount)) {
                 owner.owned_data[pos].durability = Math.min(100, owner.owned_data[pos].durability + 5);
-                showMsg("336 健檢", `堅固值回升 5`, "🔧");
+                showMsg("336 健檢", `獲得免費機械健檢，堅固值回升 5`, "🔧");
                 if (owner.owned_data[pos].visitCount === 12) owner.owned_data[pos].visitCount = 0;
             }
         }
@@ -645,30 +716,32 @@
         } else if (t.specialType === 'rest') {
             if (!fromEvent) {
                 triggerRandomSpecial(pos, [
-                    { t: "休息室交流經驗，學到新技巧，往前 1 格", f: (p)=>{ p.pos = (p.pos+1)%36; updatePlayersUI(); setTimeout(()=>handleTile(p.pos, true), 800); }, i: "🏃", ra: false },
-                    { t: "午休睡過過頭，被主管點名，扣 200 元", f: (p)=>{ p.balance -= 200; }, i: "😴", ra: false },
-                    { t: "好好休息補充體力，免除下一次停留懲罰 1 次", f: (p)=>{ p.skipImmunity++; }, i: "🔋", ra: false }
+                    { t: "學到新技巧，往前 1 格", f: (p)=>{ p.pos = (p.pos+1)%36; updatePlayersUI(); setTimeout(()=>handleTile(p.pos, true), 800); }, i: "🏃", ra: false },
+                    { t: "午休睡過頭，扣 200 元", f: (p)=>{ p.balance -= 200; }, i: "😴", ra: false },
+                    { t: "補充體力，免除下次停留", f: (p)=>{ p.skipImmunity++; }, i: "🔋", ra: false }
                 ]);
             } else nextTurn();
         } else if (t.specialType === 'sports') {
             triggerRandomSpecial(pos, [
-                { t: "參加員工運動活動，精神飽滿，再擲一次", f: ()=>{}, i: "🎾", ra: true },
-                { t: "久未運動，體力下降，停留 一回合", f: (p)=>{ if(p.skipImmunity > 0){ p.skipImmunity--; return "體力尚可，抵消停留！"; } p.skipTurns = 1; }, i: "😫", ra: false },
-                { t: "運動後狀況良好，工作效率提升，獎金 +200 元", f: (p)=>{ p.balance += 200; }, i: "⚡", ra: false }
+                { t: "參加員工運動活動，精神百倍，再擲一次", f: ()=>{}, i: "🎾", ra: true },
+                { t: "通宵追劇體力下降，停留 一回合", f: (p)=>{ if(p.skipImmunity > 0){ p.skipImmunity--; return "抵消！"; } p.skipTurns = 1; }, i: "😫", ra: false },
+                { t: "工作順心，獎金 +200 元", f: (p)=>{ p.balance += 200; }, i: "⚡", ra: false }
             ]);
         } else if (t.specialType === 'restroom') {
             triggerRandomSpecial(pos, [
-                { t: "洗手時發現地面積水並回報，獎金 +200 元", f: (p)=>{ p.balance += 200; }, i: "🧼", ra: false },
-                { t: "上班偷滑手機被發現，扣 100 元", f: (p)=>{ p.balance -= 100; }, i: "📱", ra: false },
-                { t: "洗完手精神清爽，心情加成，再擲一次", f: ()=>{}, i: "✨", ra: true }
+                { t: "發現積水並回報，獎金 +200 元", f: (p)=>{ p.balance += 200; }, i: "🧼", ra: false },
+                { t: "上班偷滑IG被發現，扣 100 元", f: (p)=>{ p.balance -= 100; }, i: "📱", ra: false },
+                { t: "神清氣爽，再擲一次", f: ()=>{}, i: "✨", ra: true }
             ]);
         } else if (t.specialType === 'infirmary') {
             triggerRandomSpecial(pos, [
-                { t: "輕微拉傷，接受簡易治療，停留 一回合", f: (p)=>{ if(p.skipImmunity > 0){ p.skipImmunity--; return "包紮完畢，免停留！"; } p.skipTurns = 1; }, i: "🩹", ra: false },
-                { t: "提早回報不適，避免工安事故，獎金 +300 元", f: (p)=>{ p.balance += 300; }, i: "📢", ra: false },
-                { t: "健康檢查正常，直接離開醫護室並 再擲一次", f: ()=>{}, i: "✅", ra: true }
+                { t: "輕微拉傷，停留 一回合", f: (p)=>{ if(p.skipImmunity > 0){ p.skipImmunity--; return "包紮！"; } p.skipTurns = 1; }, i: "🩹", ra: false },
+                { t: "提早回報狀況，避免工安事故，獎金 +300 元", f: (p)=>{ p.balance += 300; }, i: "📢", ra: false },
+                { t: "體檢合格，再擲一次", f: ()=>{}, i: "✅", ra: true }
             ]);
-        } else nextTurn();
+        } else {
+            nextTurn();
+        }
         renderBoard();
     }
 
@@ -677,24 +750,24 @@
         const totalAssets = p.balance + propValue;
         const maxLoan = Math.round(totalAssets * 0.8);
 
-        document.getElementById('prop-m4-header').innerText = "🏦 銀行融資中心";
-        document.getElementById('msg-title').innerText = "融資服務";
+        document.getElementById('msg-title').innerText = "融資中心";
         document.getElementById('msg-icon').innerText = "🏦";
-        document.getElementById('msg-body').innerText = `總資產：$${totalAssets}\n最大貸款額：$${maxLoan}\n(分 5 期經起點還款)`;
+        document.getElementById('msg-body').innerText = `目前資產總額：$${totalAssets}\n最高可借貸額度：$${maxLoan}\n(分5期，每過中控室自動扣款)`;
         
         const customContent = document.getElementById('msg-custom-content');
         customContent.innerHTML = '';
         customContent.classList.remove('hidden');
 
         if (p.loanDebt > 0) {
-            customContent.innerHTML = `<div class="p-4 text-rose-500 font-bold">尚有貸款未清償！</div>`;
+            customContent.innerHTML = `<div class="p-4 text-rose-500 font-bold">目前尚有債務未清償！</div>`;
         } else {
             [2000, 5000, maxLoan].forEach(amt => {
                 const btn = document.createElement('button');
                 btn.className = "m4-btn m4-btn-blue w-full mb-2";
-                btn.innerText = `借貸 $${amt}`;
+                btn.innerText = `融資 $${amt}`;
                 btn.onclick = () => {
                     p.balance += amt; p.loanDebt = amt; p.loanInstallments = 5;
+                    addLog(`🏦 ${p.name} 融資 $${amt}`);
                     closeModal('msg-modal'); updatePlayersUI(); nextTurn();
                 };
                 customContent.appendChild(btn);
@@ -709,10 +782,9 @@
         const extra = ev.f(p);
         rollAgain = ev.ra;
         showMsg(INITIAL_TILES[pos].name, (extra ? extra + "\n" : "") + ev.t, ev.i);
-        addLog(`📍 ${p.name} 於 ${INITIAL_TILES[pos].name}：${ev.t}`);
+        addLog(`📍 ${p.name}：${ev.t}`);
         updatePlayersUI();
-        if (!rollAgain && INITIAL_TILES[p.pos].specialType !== 'rest' && !ev.t.includes('往前')) nextTurn();
-        else if (INITIAL_TILES[p.pos].specialType === 'rest') nextTurn();
+        if (!rollAgain && !ev.t.includes('往前')) nextTurn();
         else updateTurnUI();
     }
 
@@ -722,7 +794,7 @@
         const ev = CHANCE_EVENTS[Math.floor(Math.random() * CHANCE_EVENTS.length)];
         const extra = ev.effect(p);
         showMsg("機會或命運", (extra ? extra + "\n" : "") + ev.text, ev.icon);
-        addLog(`💡 ${p.name} 觸發：${ev.text}`);
+        addLog(`💡 ${p.name}：${ev.text}`);
         updatePlayersUI();
         if (p.pos !== oldPos) setTimeout(() => handleTile(p.pos, true), 800);
         else nextTurn();
@@ -730,7 +802,7 @@
 
     function triggerMaintenance(pos, owner) {
         const p = players[currentTurnPlayerIdx];
-        if (p.feeImmunity) { showMsg("主管臨檢", "免維修費！", "🛡️"); nextTurn(); return; }
+        if (p.feeImmunity) { showMsg("主管臨檢", "遵守法規，免維護費！", "🛡️"); nextTurn(); return; }
         const t = INITIAL_TILES[pos];
         const d = owner.owned_data[pos];
         let m = 1 + (d.level - 1) * 0.5;
@@ -743,10 +815,11 @@
         }
         if (fee > 0) {
             p.balance -= fee; owner.balance += fee;
-            showMsg(type, `${p.name} 支付 $${fee} 給 ${owner.name}`, "💸");
-            addLog(`💸 ${p.name} 支付 $${fee}`);
-        } else nextTurn();
+            showMsg(type, `${p.name} 向 ${owner.name} 支付 $${fee} 維修費`, "💸");
+            addLog(`💸 ${p.name} 支付 $${fee} 維修費`);
+        }
         updatePlayersUI();
+        nextTurn();
     }
 
     function showPropModal(pos, canBuy = false, canUpgrade = false) {
@@ -758,7 +831,7 @@
         document.getElementById('prop-name').innerText = t.name;
         document.getElementById('prop-price').innerText = `$${t.price || 0}`;
         document.getElementById('prop-desc').innerText = t.desc;
-        document.getElementById('prop-level').innerText = `Lv.${d.level}`;
+        document.getElementById('prop-level-tag').innerText = `Lv.${d.level}`;
         document.getElementById('prop-color-bar').style.backgroundColor = t.color || '#3b82f6';
         
         const durBar = document.getElementById('prop-durability-bar');
@@ -774,14 +847,12 @@
         actions.innerHTML = '';
         const upSection = document.getElementById('upgrade-section');
         const upList = document.getElementById('upgrade-list');
-        document.getElementById('prop-price-container').style.display = 'flex';
-        document.getElementById('prop-fees-container').style.display = 'grid';
         upSection.classList.add('hidden');
         
         if (canBuy && p.balance >= t.price) {
             const b = document.createElement('button');
             b.className = "m4-btn w-full";
-            b.innerText = `投資收購 ($${t.price})`;
+            b.innerText = `投資營運 ($${t.price})`;
             b.onclick = () => buyProp(pos);
             actions.appendChild(b);
         }
@@ -802,7 +873,7 @@
             if (ownerOfThis && d.durability < 100) {
                 const refurbBtn = document.createElement('button');
                 refurbBtn.className = "m4-btn m4-btn-blue w-full mt-2";
-                refurbBtn.innerText = `🛠️ 重新裝修 (重置等級)`;
+                refurbBtn.innerText = `🛠️ 重新裝修 (恢復標示)`;
                 refurbBtn.onclick = () => refurbishProp(pos);
                 actions.appendChild(refurbBtn);
             }
@@ -821,7 +892,7 @@
         const t = INITIAL_TILES[pos];
         p.balance -= t.price;
         p.owned_data[pos] = { level: 1, upgrades: [], durability: 100, visitCount: 0 };
-        addLog(`🏗️ ${p.name} 收購 ${t.name}`);
+        addLog(`🏗️ ${p.name} 投資收購 ${t.name}`);
         closeModal('property-modal'); updatePlayersUI(); nextTurn();
     }
 
@@ -831,7 +902,7 @@
             p.balance -= upgrade.price;
             p.owned_data[pos].upgrades.push(upgrade.name);
             p.owned_data[pos].level += 1;
-            addLog(`🛠️ ${p.name} 升級 ${INITIAL_TILES[pos].name}`);
+            addLog(`🛠️ ${p.name} 強化升級 ${INITIAL_TILES[pos].name}`);
             closeModal('property-modal'); updatePlayersUI(); nextTurn();
         }
     }
@@ -842,7 +913,7 @@
         p.owned_data[pos].upgrades = [];
         p.owned_data[pos].durability = 100;
         p.owned_data[pos].visitCount = 0;
-        addLog(`♻️ ${p.name} 重新修繕 ${INITIAL_TILES[pos].name}`);
+        addLog(`♻️ ${p.name} 重新裝修 ${INITIAL_TILES[pos].name}`);
         closeModal('property-modal'); updatePlayersUI(); renderBoard(); nextTurn();
     }
 
@@ -852,7 +923,7 @@
             const t = INITIAL_TILES[p.pos];
             p.balance += Math.round(t.price * 0.7);
             delete p.owned_data[p.pos];
-            addLog(`💰 ${p.name} 變賣資產`);
+            addLog(`💰 ${p.name} 處分資產`);
             renderBoard(); updatePlayersUI();
         }
     }
@@ -867,7 +938,7 @@
     function addLog(m) {
         const b = document.getElementById('game-logs');
         const d = document.createElement('div');
-        d.className = "mb-2 border-l-4 border-blue-500 pl-3 text-[11px] py-1 bg-slate-800 rounded-r-lg text-slate-300";
+        d.className = "mb-2 border-l-4 border-blue-500 pl-3 py-1 bg-slate-800 rounded-r-lg";
         d.innerHTML = m;
         b.prepend(d);
     }
