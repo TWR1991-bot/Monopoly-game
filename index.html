@@ -245,7 +245,7 @@
     <div class="m4-window text-center mx-4 max-w-md w-full">
         <div class="m4-header text-xl flex justify-between items-center">
             <span>預拌廠大富翁 ‧ 啟動選單</span>
-            <span class="text-xs">單機教學版 v2.0</span>
+            <span class="text-xs">教學版 v3.0</span>
         </div>
         
         <div class="p-8 space-y-6">
@@ -284,16 +284,21 @@
     <!-- 寬度補滿：三欄版面佈局 -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        <!-- 左邊：操作按鈕 + 營運日誌 -->
+        <!-- 左邊：操作按鈕 + 營運日誌 + 遊戲說明 -->
         <div class="lg:col-span-3 order-2 lg:order-1 flex flex-col gap-4">
-            <!-- 🎲 骰子與處分按鈕置於日誌上方 -->
-            <div class="flex gap-4">
-                <button id="roll-btn" class="flex-1 m4-btn text-xl py-4 hover:brightness-110">
+            <!-- 🎲 骰子與處分與資產排行按鈕置於日誌上方 -->
+            <div class="flex flex-col gap-2">
+                <button id="roll-btn" class="w-full m4-btn text-xl py-4 hover:brightness-110">
                     🎲 啟動生產循環
                 </button>
-                <button onclick="handleSellCurrent()" class="m4-btn m4-btn-blue px-6 text-xs">
-                    處分資產
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="handleSellCurrent()" class="flex-1 m4-btn m4-btn-blue py-3 text-xs">
+                        處分資產
+                    </button>
+                    <button onclick="showAssetRanking()" class="flex-1 m4-btn bg-amber-500 border-amber-700 py-3 text-xs shadow-md">
+                        🏆 資產排行
+                    </button>
+                </div>
             </div>
             
             <div class="m4-panel overflow-hidden">
@@ -301,9 +306,39 @@
                     <span>📝 營運日誌</span>
                     <span class="text-xs text-blue-100 font-normal">即時廠務紀錄</span>
                 </div>
-                <!-- 調整高度至 500px 獲得完美和諧視覺比例 -->
-                <div id="game-logs" class="log-box bg-slate-900 border-none rounded-none h-[500px] overflow-y-auto p-4 text-xs font-mono text-slate-300">
+                <!-- 調整高度至 350px 給規則說明騰出空間 -->
+                <div id="game-logs" class="log-box bg-slate-900 border-none rounded-none h-[350px] overflow-y-auto p-4 text-xs font-mono text-slate-300">
                     <div class="text-slate-400 italic">等待生產循環啟動...</div>
+                </div>
+            </div>
+
+            <!-- 新增：遊戲規則說明手冊 -->
+            <div class="m4-panel overflow-hidden">
+                <div class="m4-header text-sm flex items-center justify-between bg-emerald-600 border-emerald-800">
+                    <span>📋 廠務大富翁營運規則</span>
+                </div>
+                <div class="p-4 bg-emerald-50/50 h-[300px] overflow-y-auto text-xs space-y-3 font-bold text-slate-700 leading-relaxed border-t border-emerald-200">
+                    <div>
+                        <h4 class="font-black text-emerald-800 border-b border-emerald-200 pb-1 mb-1 text-sm">💰 淨資產排行規則</h4>
+                        <p>淨資產計算公式：<strong>手頭現有現金 + 旗下所有設備原公司報價 - 銀行融資欠款</strong>。點擊排行按鈕可實時檢視大賽名次與財務比例。</p>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-emerald-800 border-b border-emerald-200 pb-1 mb-1 text-sm">🏦 銀行服務 (二選一)</h4>
+                        <p>抵達或經過銀行格時，僅能從以下兩項核心營運方針中擇一執行：</p>
+                        <ul class="list-disc list-inside pl-1 mt-1 space-y-1 text-slate-600">
+                            <li><strong class="text-slate-700">A. 申請融資貸款</strong>：最大申貸額度為目前淨資產的 80%。<strong>還款條件</strong>為當玩家下次經過或抵達「中控室（起點）」時，銀行會<strong>一次性強制全額扣款結清債務</strong>。</li>
+                            <li><strong class="text-slate-700">B. 發動敵意設備收購</strong>：可強制以公司報價，收購「資產總值低於自己」的玩家設備！必須答對該設備隨機產出的<strong>三選一廠務挑戰問答題</strong>才可收購成功；答錯收購失效。</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-emerald-800 border-b border-emerald-200 pb-1 mb-1 text-sm">⚙️ 折舊磨損與設備停機</h4>
+                        <p>設備磨損頻率隨遊玩人數動態調整（人數越多、折舊越快）：6人遊玩每1回合扣1堅固值；5人遊玩每2回合扣1；4人遊玩每3回合扣1；3人遊玩每4回合扣1；2人遊玩每5回合扣1；1人遊玩每6回合扣1。當堅固值低於 50% 時維修費減半，降至 0% 時設備全面停機、停收過路保養費。</p>
+                        <p class="mt-1"><strong class="text-slate-700">336 健檢</strong>：房主每停留自己資產滿 3/6/12 次，該設備堅固值回升 5%（最高100%）。</p>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-emerald-800 border-b border-emerald-200 pb-1 mb-1 text-sm">💼 處分資產使用說明</h4>
+                        <p>當技術員停留於<strong>【自己擁有】</strong>的設備格時，可點選左上角<strong>【處分資產】</strong>按鈕。銀行將以該設備原公司報價的 <strong>70%</strong> 進行折價回收，立即變現。這在面臨高額債務、面臨維修支出或現金流週轉不足時，是極為關鍵的緊急避險手段。</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -378,15 +413,15 @@
     </div>
 </div>
 
-<!-- 廠務隨機通知彈窗 -->
+<!-- 廠務隨機通知與問答彈窗 -->
 <div id="msg-modal" class="modal">
     <div class="m4-window">
-        <div class="m4-header">廠務通知</div>
+        <div class="m4-header" id="msg-window-header">廠務通知</div>
         <div class="p-8 text-center">
             <div id="msg-icon" class="text-6xl mb-4">📢</div>
             <h3 id="msg-title" class="text-xl font-black text-blue-800 mb-2">通知標題</h3>
-            <p id="msg-body" class="text-slate-500 mb-6 text-lg leading-relaxed"></p>
-            <div id="msg-custom-content" class="mb-6 hidden"></div>
+            <p id="msg-body" class="text-slate-500 mb-6 text-sm leading-relaxed text-left whitespace-pre-wrap"></p>
+            <div id="msg-custom-content" class="mb-6 hidden text-left max-h-[250px] overflow-y-auto space-y-2 pr-1"></div>
             <button id="msg-close-btn" onclick="closeModal('msg-modal')" class="m4-btn w-full">確認收悉</button>
         </div>
     </div>
@@ -397,8 +432,9 @@
     let players = [];
     let currentTurnPlayerIdx = 0;
     let rollAgain = false;
-    let expandedPlayerId = null; // 用於紀錄目前展開資產下拉的技術員 ID
-    let gameLogsList = [];       // 【修復】將日誌陣列置頂宣告，免去 TDZ Temporal Dead Zone 報錯！
+    let expandedPlayerId = null;     // 用於紀錄目前展開資產下拉的技術員 ID
+    let gameLogsList = [];           // 日誌陣列置頂宣告，防止在 initGame 中調用時報 defined 錯誤
+    let turnsSinceLastDeduction = 0; // 用於動態折舊運算的多人回合計數器
 
     // 大富翁 6 角色定義
     const CHARACTER_POOL = [
@@ -410,7 +446,7 @@
         { name: "烏咪", icon: "🏹", color: "#FFA500" }
     ];
 
-    // 地圖資料定義 (最新完整描述)
+    // 地圖資料定義 (詳細技術內容)
     const INITIAL_TILES = [
         { type: 'special', name: '中控室', color: '#10b981', desc: '全廠的大腦，負責調度、監控與配比管理。起點接口。', specialType: 'start' },
         { type: 'prop', name: '卡車卸料斗', price: 850, color: '#3b82f6', desc: '砂石車卸料承接的斗子，上面安裝篩網可將骨材震動過篩結塊分散。', fees:{repair:250, maint:85}, upgrades:[{name:'升級: 防塵屋', price:250, type:'step', levelReq:1, upgradeNote: '防塵屋有效阻隔卸料時產生的揚塵。'},{name:'升級: 收料室', price:550, type:'step', levelReq:2, upgradeNote: '完整的收料室結構，提供最佳的環境維護與收料效率。'}]},
@@ -423,40 +459,395 @@
         
         { type: 'prop', name: '分料帶運機', price: 500, color: '#a855f7', desc: '骨材分倉作業設備，儀控式收到物料種類會將分料旋轉到指定倉別等待入料，分料帶運機就像一條濃縮版的輸送帶，所有的帶運機物件都安裝在這一小台上面。', fees:{repair:150, maint:50}, upgrades:[{name:'加購: 分料旋轉座', price:350, type:'step', levelReq:1, upgradeNote: '輔助分料帶運機旋轉選倉。'}]},
         { type: 'prop', name: '分料平台', price: 400, color: '#a855f7', desc: '為八卦設計，用於維修分料機的平台空間。', fees:{repair:120, maint:40}, upgrades:[{name:'加購: 上方走廊', price:250, type:'step', levelReq:1, upgradeNote: '環繞骨材庫行走，一般走道寬度為800。'}]},
-        { type: 'special', name: '機會或命運', icon: '❓', desc: '廠區營運未知變數。', specialType: 'chance_or_fate' },
-        { type: 'prop', name: '骨材庫', price: 5400, color: '#a855f7', desc: '主要存放骨材的地方，規格有9M、10M、12M，會依據業主存量需求增加層數與倉數。', fees:{repair:1600, maint:540}, upgrades:[{name:'安裝: 鐵製腳柱', price:895, type:'choice', upgradeNote: '鐵製腳柱設計上較有整體性。'},{name:'安裝: RC腳柱', price:1200, type:'choice', upgradeNote: '一般RC腳柱乘載力佳。'},{name:'加購: 骨材庫鐵屋', price:1350, type:'step', levelReq:2, upgradeNote: '用於包覆骨材倉上方避免風吹日曬雨淋。'}]},
+        { type: 'special', name: '機會或命運', icon: '❓', desc: '生產中的未知變數。', specialType: 'chance_or_fate' },
+        { type: 'prop', name: '骨材庫', price: 5400, color: '#a855f7', desc: '主要存放骨材的地方，規格有9M、10M、12M，會依據業主存量需求增加層數與倉數。', fees:{repair:1600, maint:540}, upgrades:[{name:'安裝: 鐵製腳柱', price:895, type:'choice', upgradeNote: '鐵製腳柱設計上較有整體性。'},{name:'安裝: RC腳柱', price:1200, type:'choice', upgradeNote: '一般RC腳柱乘載力佳，但下方維修空間小。'},{name:'加購: 骨材庫鐵屋', price:1350, type:'step', levelReq:2, upgradeNote: '用於包覆骨材倉上方避免風吹日曬雨淋。'}]},
         { type: 'prop', name: '砂石閘門', price: 70, color: '#a855f7', desc: '骨材庫的下料開關閘門，從外型來看閘門為圓弧形的是砂閘門，折角形的是石閘門。', fees:{repair:20, maint:10} },
         { type: 'prop', name: '砂石計量桶', price: 500, color: '#a855f7', desc: '計算砂子與石頭比重的設備，砂計量靠近末端襯底，每立方的混凝土約搭配砂石各900kg的骨材。', fees:{repair:150, maint:50} },
         
-        { type: 'special', name: '銀行', color: '#fef9c3', icon: '🏦', desc: '廠區財務中心，可借貸服務。', specialType: 'bank' },
+        { type: 'special', name: '銀行', color: '#fef9c3', icon: '🏦', desc: '廠區財務中心，可借貸與敵意設備收購服務。', specialType: 'bank' },
         
         { type: 'prop', name: '主尾輪座', price: 370, color: '#f97316', desc: '主機帶運機末端，支撐輸送皮帶。', fees:{repair:110, maint:35}, upgrades:[{name:'加購: 尾輪保護網', price:150, type:'step', levelReq:1},{name:'更換: UKT系列軸承', price:200, type:'step', levelReq:2}]},
         { type: 'prop', name: '主尾輪段', price: 400, color: '#f97316', desc: '主要下料承接處，一般會安裝3~4組的拖架緩衝滾輪。', fees:{repair:120, maint:40}, upgrades:[{name:'加購: 整流板', price:150, type:'step', levelReq:1},{name:'加購: 三角皮帶清潔器', price:200, type:'step', levelReq:2}]},
-        { type: 'prop', name: '主帶機中段', price: 620, color: '#f97316', desc: '輸送設備的核心桁架，10Ｍ為1截，每1M會安裝1組前行輪。', fees:{repair:180, maint:60}, upgrades:[{name:'加購: 雙側保護網', price:250, type:'step', levelReq:1},{name:'加購: 安全拉繩', price:300, type:'step', levelReq:2}]},
+        { type: 'prop', name: '主帶機中段', price: 620, color: '#f97316', desc: '輸送設備的核心桁架，10Ｍ為1截，每1M會安裝1組前行輪，底層安裝水槽承接砂石。', fees:{repair:180, maint:60}, upgrades:[{name:'加購: 雙側保護網', price:250, type:'step', levelReq:1},{name:'加購: 安全拉繩', price:300, type:'step', levelReq:2}]},
         { type: 'prop', name: '主頭輪座', price: 2200, color: '#f97316', desc: '整條帶運機的帶動核心，安裝馬達及減速機來運轉皮帶。', fees:{repair:660, maint:220}, upgrades:[{name:'升級: 錐套式減速機', price:600, type:'step', levelReq:1},{name:'更換: 陶瓷包膠', price:800, type:'step', levelReq:2}]},
         { type: 'special', name: '休息室', icon: '☕', price: 1500, desc: '合理的摸魚是上班的動力。', specialType: 'rest' },
-        { type: 'prop', name: '骨材待拌槽', price: 300, color: '#06b6d4', desc: '骨材在主機樓內部待命處。', fees:{repair:90, maint:30}, upgrades:[{name:'加購: 待拌槽雙邊走廊', price:200, type:'step', levelReq:1, upgradeNote: '作為頭輪座維修空間。'},{name:'更換: 雙層待拌槽', price:450, type:'step', levelReq:2, upgradeNote: '砂子下料形成漿體包覆葉片，保護備品。'}]},
-        { type: 'prop', name: '砂石滑槽', price: 200, color: '#06b6d4', desc: '骨材進到拌合機的銜接槽體。', fees:{repair:60, maint:20}, upgrades:[{name:'加裝: 震動機', price:150, type:'step', levelReq:1, upgradeNote: '震動機有效加速下料。'},{name:'加購: 滑槽維修走道', price:200, type:'step', levelReq:2, upgradeNote: '便於維修更換待拌槽空壓缸，位於天花板頂不影響空間。'}]},
+        { type: 'prop', name: '骨材待拌槽', price: 300, color: '#06b6d4', desc: '骨材在主機樓內部待命處。', fees:{repair:90, maint:30}, upgrades:[{name:'加購: 待拌槽雙邊走廊', price:200, type:'step', levelReq:1, upgradeNote: '作為頭輪座維修空間。'},{name:'更換: 雙層待拌槽', price:450, type:'step', levelReq:2, upgradeNote: '砂子下料混拌形成漿體包覆葉片，避免石頭直接衝擊攪拌葉片備品。'}]},
+        { type: 'prop', name: '砂石滑槽', price: 200, color: '#06b6d4', desc: '骨材進到拌合機的銜接槽體。', fees:{repair:60, maint:20}, upgrades:[{name:'加裝: 震動機', price:150, type:'step', levelReq:1, upgradeNote: '震動機有效加速下料。'},{name:'加購: slide槽維修走道', price:200, type:'step', levelReq:2, upgradeNote: '便於維修更換待拌槽空壓缸。'}]},
         
         { type: 'special', name: '洗手間', color: '#fef9c3', icon: '🚻', desc: '不要隨地大小便。', specialType: 'restroom' },
         
-        { type: 'prop', name: '水泥桶', price: 2150, color: '#64748b', desc: '裝載膠結材（水泥、飛灰、爐石）的儲存桶，每顆桶存放一種物料，每立方的混凝土約搭配200kg的水泥和各100kg的飛灰、爐石。', fees:{repair:645, maint:215}, upgrades:[{name:'加購: 桶上集塵機', price:400, type:'step', levelReq:1, upgradeNote: '吸取進料粉塵及釋放空氣壓力避免爆桶。'},{name:'加購: 手動蝶閥', price:250, type:'step', levelReq:2, upgradeNote: '手動蝶閥可控制料出的量，便於更換下方設備。'}]},
-        { type: 'prop', name: '螺運機', price: 380, color: '#64748b', desc: '膠結材的輸送設備，內部使用螺旋葉片設計。', fees:{repair:110, maint:40} },
-        { type: 'prop', name: '粉體計量桶', price: 350, color: '#64748b', desc: '計算膠結材比重。', fees:{repair:100, maint:35} },
-        { type: 'prop', name: '粉體滑槽', price: 150, color: '#64748b', desc: '粉體進入拌合機銜接設備，中間插管搭配不織布管防止粉塵外洩。', fees:{repair:45, maint:15} },
+        { type: 'prop', name: '水泥桶', price: 2150, color: '#64748b', desc: '裝載膠結材（水泥、飛灰、爐石）的儲存桶，每顆桶存放一種物料，每立方的混凝土約搭配200kg的水泥和各100kg的飛灰、爐石。', fees:{repair:645, maint:215}, upgrades:[{name:'加購: 桶上集塵機', price:400, type:'step', levelReq:1, upgradeNote: '吸取進料粉塵及釋放空氣壓力避免爆桶。'},{name:'加購: 手動蝶閥', price:250, type:'step', levelReq:2, upgradeNote: '蝶閥可控制料出的量，便於更換下方設備。'}]},
+        { type: 'prop', name: '螺運機', price: 380, color: '#64748b', desc: '膠結材的輸送設備，內部使用螺旋葉片設計。', fees:{repair:110, maint:40}, upgrades:[{name:'升級: 加購螺運機支架', price:200, type:'step', levelReq:1, upgradeNote: '加購支架提供螺運機更穩固的結構支撐，減少高負載送料時的震動與管路磨損。'},{name:'升級: 更換為子母螺運機', price:400, type:'step', levelReq:2, upgradeNote: '子母螺運機說明：母螺運機附帶６吋子螺運機，可替代微計量作用，替代原有雙行程鋁製蝶閥。'}] },
+        { type: 'prop', name: '粉體計量桶', price: 350, color: '#64748b', desc: '計算膠結材比重。每立方的混凝土約搭配200kg的水泥和各100kg的飛灰、爐石。', fees:{repair:100, maint:35} },
+        { type: 'prop', name: '粉體滑槽', price: 150, color: '#64748b', desc: '粉體進入拌合機銜接設備，中間插管搭配不織布管防止粉塵外溢。', fees:{repair:45, maint:15}, upgrades:[{name:'升級: 加裝震動機', price:150, type:'step', levelReq:1, upgradeNote: '加速粉體下料，避免管壁殘留與堵塞。'},{name:'升級: 加裝檢視孔', price:200, type:'step', levelReq:2, upgradeNote: '可用於清潔內部使用。'}] },
         { type: 'prop', name: '主機集塵機', price: 500, color: '#06b6d4', desc: '主要吸取拌合機內的粉塵，透過膜片閥充氣將布管粉塵吹落回收利用。', fees:{repair:150, maint:50} },
         { type: 'special', name: '機會或命運', icon: '❓', desc: '廠區營運未知變數。', specialType: 'chance_or_fate' },
         { type: 'prop', name: '藥劑計量設備', price: 180, color: '#06b6d4', desc: '藥劑比重計算設備，每立方混凝土約搭配5kg的藥劑。', fees:{repair:55, maint:18} },
-        { type: 'prop', name: '清水桶', price: 280, color: '#06b6d4', desc: '位於主機內部的清水儲存系統，作為一個中轉站提升生產效率，每立方的混凝土約搭配150kg的水(包含清水、汙水、冰水)。', fees:{repair:85, maint:28}, upgrades:[{name: '加裝: 冰水系統', price: 350, type: 'addon'}]},
+        { type: 'prop', name: '清水桶', price: 280, color: '#06b6d4', desc: '位於主機內部的清水儲存系統，作為一個中轉站提升生產效率，每立方混凝土約搭配150kg的水(包含清水、汙水、冰水)。', fees:{repair:85, maint:28}, upgrades:[{name: '加裝: 冰水系統', price: 350, type: 'addon'}]},
         { type: 'prop', name: '主機汙水攪拌桶', price: 300, color: '#06b6d4', desc: '暫存設備，內部攪拌設計讓淤泥不沉澱，上面加裝灑水系統減少附著。', fees:{repair:90, maint:30} },
-        { type: 'prop', name: '水計量桶', price: 260, color: '#06b6d4', desc: '計算水類比例，每立方的混凝土約搭配150kg的水(包含清水、汙水、冰水)。', fees:{repair:75, maint:26} },
+        { type: 'prop', name: '水計量桶', price: 260, color: '#06b6d4', desc: '計算水類比例，每立方的混凝土約搭配150kg的水(包含清水、汙水、冰水)。', fees:{repair:75, maint:26}, upgrades:[{name: '升級: 加裝水緩衝桶', price: 300, type: 'step', levelReq: 1, upgradeNote: '出水時的一個緩衝空間，可穩定並加速計量入料流程。'}] },
         
-        { type: 'special', name: '醫護室', color: '#fef9c3', icon: '🏥', desc: '跌打損傷通通都醫。', specialType: 'infirmary' },
+        { type: 'special', name: '醫護室', color: '#fef9c3', icon: '🏥', desc: '員工健康檢查站。', specialType: 'infirmary' },
         
-        { type: 'prop', name: '水緩衝桶', price: 300, color: '#f43f5e', desc: '出水時的一個緩衝空間。', fees:{repair:90, maint:30} },
-        { type: 'prop', name: '拌合機', price: 3300, color: '#f43f5e', desc: '預拌廠的心臟，主要用於混拌原物料，每分鐘可產出３方的混凝土，轉速每分鐘可繳拌23~26下。', fees:{repair:1000, maint:330} },
-        { type: 'prop', name: '混凝土儲斗', price: 800, color: '#f43f5e', desc: '成品暫存槽，容量設計一般為7方，可配合一台預拌車出車。', fees:{repair:240, maint:80}, upgrades:[{name: '加裝: 力霸式夾具', price: 150, type: 'step', levelReq: 1},{name: '加裝: 儲斗維修平台', price: 150, type: 'step', levelReq: 2, upgradeNote: '提供維修更換備品時的站立空間與安全圍欄。'}]}
+        { type: 'prop', name: '拌合機', price: 3300, color: '#f43f5e', desc: '預拌廠的心臟，主要用於混拌原物料，每分鐘可產出３方的混凝土，轉速每分鐘可繳拌23~26下。', fees:{repair:1000, maint:330}, upgrades:[{name:'升級: 加購監視相機', price:600, type:'step', levelReq:1, upgradeNote: '用於監視拌合機內攪拌狀況，透過氣壓缸作動控制擋板，打開時可以看到拌合機內，關閉時可避免漿體噴濺到玻璃髒掉。'},{name:'升級: 更換高級耐磨備品', price:1200, type:'step', levelReq:2, upgradeNote: '可將所有耐磨備品更換成最高級，同時可回復堅固值10，此升級的回復堅固值只能這一次。'}] },
+        { type: 'prop', name: '混凝土儲斗', price: 800, color: '#f43f5e', desc: '混凝土最終成品暫存槽，容量設計一般為7方，可配合一台預拌車出車。', fees:{repair:240, maint:80}, upgrades:[{name: '加裝: 力霸式夾具', price: 150, type: 'step', levelReq: 1},{name: '加裝: 儲斗維修平台', price: 150, type: 'step', levelReq: 2, upgradeNote: '提供維修更換備品時的站立空間與安全圍欄。'}] },
+        { type: 'prop', name: '清洗接廢', price: 300, color: '#f43f5e', desc: '拌合機內部清洗後廢水及淤泥排放的設備。', fees:{repair:90, maint:30} }
     ];
+
+    const CHANCE_EVENTS = [
+        { text: "老闆臨時外派出差，暫停一回合", effect: (p) => { if(p.skipImmunity > 0) { p.skipImmunity--; return "體力充沛，抵消停留！"; } p.skipTurns = 1; }, icon: "💼" },
+        { text: "天氣轉涼生病發燒，在家休息停留一回合", effect: (p) => { if(p.skipImmunity > 0) { p.skipImmunity--; return "體力充沛，抵消停留！"; } p.skipTurns = 1; }, icon: "🤒" },
+        { text: "上班途中機車故障，事假扣錢 200 元", effect: (p) => { p.balance -= 200; }, icon: "🛵" },
+        { text: "進入工地未戴安全帽，被檢舉扣 500 元", effect: (p) => { p.balance -= 500; }, icon: "👷" },
+        { text: "受傷前往 #33 醫護室治療並停留一回合", effect: (p) => { p.pos = 32; if(p.skipImmunity > 0) { p.skipImmunity--; return "已抵達醫護室，但體力佳無需停留！"; } p.skipTurns = 1; }, icon: "🩹" },
+        { text: "老闆臨時外派業務出差，賺取加班費 1500 元", effect: (p) => { p.balance += 1500; }, icon: "💰" },
+        { text: "協助客戶設備搶修，賺取獎金 1500 元", effect: (p) => { p.balance += 1500; }, icon: "🔧" },
+        { text: "工作良好賺取獎金 300 元", effect: (p) => { p.balance += 300; }, icon: "⭐" },
+        { text: "未依 SOP 開機，罰款 600 元", effect: (p) => { p.balance -= 600; }, icon: "⚠️" },
+        { text: "發現料斗殘料未清，獎金 +300 元", effect: (p) => { p.balance += 300; }, icon: "🧹" },
+        { text: "忘記回填保養紀錄，停留一回合", effect: (p) => { if(p.skipImmunity > 0) { p.skipImmunity--; return "紀錄已補，免停留！"; } p.skipTurns = 1; }, icon: "📝" },
+        { text: "主動提醒同事戴帽，獎金 +400 元", effect: (p) => { p.balance += 400; }, icon: "👍" },
+        { text: "進入工地未戴安全帽，扣 300 元", effect: (p) => { p.balance -= 300; }, icon: "👷" },
+        { text: "完成教育訓練，往前移動 2 格", effect: (p) => { p.pos = (p.pos + 2) % 36; return "進度超前！"; }, icon: "📖" },
+        { text: "雨天未注意防滑跌倒，前往 醫護室 停留一回合", effect: (p) => { p.pos = 32; if(p.skipImmunity > 0) { p.skipImmunity--; return "無礙，免停留！"; } p.skipTurns = 1; }, icon: "🌧️" },
+        { text: "確認配比正確，獎金 +500 元", effect: (p) => { p.balance += 500; }, icon: "⚖️" },
+        { text: "溝由不良延誤出車，扣 400 元", effect: (p) => { p.balance -= 400; }, icon: "📞" },
+        { text: "協助調度臨時加單, 獎金 +600 元", effect: (p) => { p.balance += 600; }, icon: "📦" },
+        { text: "出車單未即時回報，停留一回合", effect: (p) => { if(p.skipImmunity > 0) { p.skipImmunity--; return "免停留！"; } p.skipTurns = 1; }, icon: "🚚" },
+        { text: "主管臨檢日：免除本回合維修費", effect: (p) => { p.feeImmunity = true; }, icon: "🧐" },
+        { text: "突發大單完成，獎金 +1,000 元", effect: (p) => { p.balance += 1000; }, icon: "🔥" },
+        { text: "臨時外派受訓：停留一回合", effect: (p) => { if(p.skipImmunity > 0) { p.skipImmunity--; return "免停留！"; } p.skipTurns = 1; }, icon: "🎓" }
+    ];
+
+    // --- 專業技術挑戰題庫 ---
+    const TILE_QUIZ_BANK = {
+        "卡車卸料斗": [
+            { q: "卡車卸料斗上面安裝篩網的主要功用是什麼？", a: ["吸取進料粉塵", "將骨材震動過篩並將結塊分散", "精密計量骨材比重"], correct: 1 },
+            { q: "卸料斗升級『防塵屋』配件能達到何種效果？", a: ["加速骨材下料", "有效阻隔卸料時產生的揚塵", "防止輸送帶跑偏"], correct: 1 }
+        ],
+        "入庫尾輪座": [
+            { q: "加購『尾輪保護網』的主要工安防護作用是什麼？", a: ["防止皮帶磨損", "有效防止人員直接觸碰輸送中的皮帶", "吸收下料震動衝擊"], correct: 1 },
+            { q: "入庫尾輪座在帶運機最末端的核心功用是什麼？", a: ["提供主要運轉動力", "支撐並運轉皮帶", "承接下料衝擊"], correct: 1 }
+        ],
+        "入庫尾輪段": [
+            { q: "作為下料衝擊的主要承接處，一般會安裝幾組拖架緩衝滾輪？", a: ["1~2組", "3~4組", "5~6組"], correct: 1 }
+        ],
+        "入庫機中段": [
+            { q: "入庫機中段桁架設計中，上層每隔多少距離會安裝一組前行滾輪？", a: ["1M", "2M", "3M"], correct: 0 },
+            { q: "桁架底層安裝什麼用來承接落下的砂石？", a: ["集塵吹落袋", "水槽", "震動輔助座"], correct: 1 }
+        ],
+        "入庫頭輪座": [
+            { q: "入庫頭輪座作為輸送皮帶帶動的核心，是藉由何種設備來運轉皮帶？", a: ["空壓缸與蝶閥", "螺旋葉片", "馬達及減速機"], correct: 2 }
+        ],
+        "分料帶運機": [
+            { q: "分料帶運機透過儀控收到配比物料後，會進行什麼作業？", a: ["將汙水沉澱防結塊", "將分料旋轉至指定倉別等待入料", "計量飛灰水泥比例"], correct: 1 }
+        ],
+        "分料平台": [
+            { q: "用於維修分料機的分料平台，外觀一般採用什麼幾何形狀設計？", a: ["長方形設計", "八卦設計", "圓形設計"], correct: 1 }
+        ],
+        "骨材庫": [
+            { q: "骨材庫常見的規格與深度，不包含下列哪項？", a: ["9M", "12M", "16M"], correct: 2 },
+            { q: "加購『骨材庫鐵屋』升級配件，主要可以防範何種狀況？", a: ["防止設備跑偏", "防範骨材遭受風吹日曬雨淋", "降低故障維修費"], correct: 1 }
+        ],
+        "砂石閘門": [
+            { q: "如何從閘門外型判斷『砂閘門』與『石閘門』？", a: ["圓弧形是砂閘門，折角形是石閘門", "折角形是砂閘門，圓弧形是石閘門", "圓弧形是砂閘門，波浪形是石閘門"], correct: 0 }
+        ],
+        "砂石計量桶": [
+            { q: "計量桶在計算比重時，砂計量通常裝載於何處以作為緩衝？", a: ["頂端溢流口", "靠近末端襯底", "進料口插管"], correct: 1 }
+        ],
+        "主尾輪座": [
+            { q: "主機帶運機末端尾輪座，其最核心的功用為何？", a: ["過篩結塊砂石", "支撐輸送皮帶並使其送料", "提供旋轉動力"], correct: 1 }
+        ],
+        "主尾輪段": [
+            { q: "主尾輪段下料衝擊點，一般會安裝幾組緩衝滾輪？", a: ["1~2組", "3~4組", "5~6組"], correct: 1 }
+        ],
+        "主帶機中段": [
+            { q: "主帶機中段的桁架中，每隔幾公尺會安裝一組回程滾輪？", a: ["1M", "2M", "3M"], correct: 1 }
+        ],
+        "主頭輪座": [
+            { q: "主頭輪座作為驅動核心，皮帶是靠何種機件運轉送料？", a: ["螺旋內頁", "馬達及減速機", "空壓缸氣壓"], correct: 1 }
+        ],
+        "骨材待拌槽": [
+            { q: "骨材待拌槽在主機樓內，升級為『雙層待拌槽』的主要優點是什麼？", a: ["美化主機外觀", "砂料先在下層混拌形成漿體包覆葉片，保護攪拌葉片備品", "節省出水緩衝空間"], correct: 1 }
+        ],
+        "砂石滑槽": [
+            { q: "砂石滑槽升級加裝『震動機』能達到何種顯示效用？", a: ["冷卻水類溫度", "有效加速下料並避免砂石殘留", "精準計量比重"], correct: 1 }
+        ],
+        "水泥桶": [
+            { q: "水泥桶加購『桶上集塵機』主要是為了解決什麼工安問題？", a: ["提升送料速度", "吸取進料粉塵並釋放空氣壓力避免爆桶", "避免汙水淤泥沉澱"], correct: 1 }
+        ],
+        "螺運機": [
+            { q: "螺運機主要負責輸送膠結材，其送料是依靠何種機械設計？", a: ["上面加裝灑水系統", "插管搭配不織布管", "內部螺旋葉片旋轉"], correct: 2 },
+            { q: "子母螺運機的『子螺運機』在廠務運作中主要具備何種改良功用？", a: ["增加美觀性", "母螺運機附帶６吋子螺運機，可替代微計量作用，並替代原有雙行程鋁製蝶閥", "用來清洗整流板上的淤泥"], correct: 1 }
+        ],
+        "粉體計量桶": [
+            { q: "粉體計量桶在配比計算中，每立方混凝土約搭配水泥、飛灰、爐石各多少？", a: ["200kg水泥，飛灰與爐石各100kg", "100kg水泥，飛灰與爐石各200kg", "500kg水泥，飛灰與爐石各50kg"], correct: 0 }
+        ],
+        "粉體滑槽": [
+            { q: "粉體滑槽中間使用插管搭配不織布管做銜接設計，主要目的為何？", a: ["防結塊並過篩", "防止粉塵外溢", "增加計量比重精度"], correct: 1 },
+            { q: "粉體滑槽升級加裝『檢視孔』主要具有什麼作用？", a: ["提高骨材過篩率", "可用於清潔內部使用與日常目視檢查", "自動氣動計量調節"], correct: 1 }
+        ],
+        "主機集塵機": [
+            { q: "主機集塵機是如何將布管上的粉塵吹落回收利用的？", a: ["透過震動滾輪敲擊", "透過膜片閥充氣", "透過上面加裝灑水"], correct: 1 }
+        ],
+        "藥劑計量設備": [
+            { q: "藥劑計量設備在調配混凝土時，每立方混凝土約搭配多少藥劑？", a: ["150kg", "200kg", "5kg"], correct: 2 }
+        ],
+        "清水桶": [
+            { q: "清水桶置於主機內部的核心功能是什麼？", a: ["過篩砂石雜質", "作為中轉站提升清水儲存與生產效率", "防止水泥爆桶"], correct: 1 }
+        ],
+        "主機汙水攪拌桶": [
+            { q: "汙水暫存設備使用攪拌設計的核心目的是什麼？", a: ["避免水溫過高", "讓淤泥不沉澱造成結塊並減少桶壁附著", "過濾清水雜質"], correct: 1 }
+        ],
+        "水計量桶": [
+            { q: "水計量桶在計算水類比例時，每立方混凝土約搭配多少公斤的水？", a: ["100kg", "150kg(含清水/汙水/冰水)", "900kg"], correct: 1 },
+            { q: "水計量桶升級加購『水緩衝桶』其最核心的優勢是什麼？", a: ["用於清洗接廢淤泥", "作為出水時的一個緩衝空間，可穩定並加速計量入料流程", "降低混凝土內部溫度"], correct: 1 }
+        ],
+        "拌合機": [
+            { q: "拌合機每分鐘可產出幾方的混凝土？轉速每分鐘可攪拌幾下？", a: ["產出 1 方，攪拌 50-60 下", "產出 3 方，攪拌 23-26 下", "產出 7 方，攪拌 10-15 下"], correct: 1 },
+            { q: "拌合機升級為『監視相機』主要是為了解決什麼狀況？", a: ["自動計算水粉比例", "監視拌合機內攪拌狀況，並避免漿體噴濺到玻璃髒掉", "提升每分鐘轉速至50次"], correct: 1 }
+        ],
+        "混凝土儲斗": [
+            { q: "混凝土儲斗作為成品暫存槽，其設計容量一般為幾方（可配合一台預拌車出車）？", a: ["3方", "5方", "7方"], correct: 2 }
+        ],
+        "清洗接廢": [
+            { q: "預拌廠中『清洗接廢』設備的主要功能是什麼？", a: ["作為出水時的一個緩衝空間", "拌合機內部清洗後廢水及淤泥排放的設備", "加裝集塵布袋吸取粉塵"], correct: 1 }
+        ]
+    };
+
+    // --- 輔助財務統計函數 ---
+    function calcTotalAssets(p) {
+        let propValue = Object.keys(p.owned_data).reduce((acc, idx) => acc + INITIAL_TILES[idx].price, 0);
+        return p.balance + propValue - p.loanDebt;
+    }
+
+    // --- 顯示實時淨資產總排行 ---
+    function showAssetRanking() {
+        if (players.length === 0) return;
+        
+        // 根據淨資產大到小排序
+        let ranked = [...players].sort((a, b) => calcTotalAssets(b) - calcTotalAssets(a));
+        
+        document.getElementById('msg-window-header').innerText = "🏆 淨資產營運動態排行";
+        document.getElementById('msg-title').innerText = "技術員資產總排行";
+        document.getElementById('msg-icon').innerText = "🏆";
+        document.getElementById('msg-body').innerText = "依據【手頭現金 + 旗下所有設備原公司報價 - 融資欠款】計算技術員的淨營運資產。";
+        
+        const customContent = document.getElementById('msg-custom-content');
+        customContent.innerHTML = '';
+        customContent.classList.remove('hidden');
+
+        ranked.forEach((p, idx) => {
+            let medal = "🥉";
+            if (idx === 0) medal = "🥇";
+            else if (idx === 1) medal = "🥈";
+
+            const row = document.createElement('div');
+            row.className = "p-3 bg-white border-2 border-blue-200 rounded-xl font-bold flex justify-between items-center text-sm shadow-sm";
+            row.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">${medal}</span>
+                    <span>${p.avatar} ${p.name}</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-blue-600 font-extrabold">淨資產 $${calcTotalAssets(p)}</span>
+                    <p class="text-[10px] text-slate-400 font-normal">手頭: $${p.balance} | 設備值: $${Object.keys(p.owned_data).reduce((acc, idx) => acc + INITIAL_TILES[idx].price, 0)} | 欠款: $${p.loanDebt}</p>
+                </div>
+            `;
+            customContent.appendChild(row);
+        });
+
+        document.getElementById('msg-modal').classList.add('active-modal');
+    }
+    window.showAssetRanking = showAssetRanking;
+
+    // --- 銀行（#14 🏦）二選一核心功能 (融資貸款 vs 設備收購) ---
+    function triggerBank(p) {
+        document.getElementById('msg-window-header').innerText = "🏦 銀行與收購中心";
+        document.getElementById('msg-title').innerText = "選擇銀行服務";
+        document.getElementById('msg-icon').innerText = "🏦";
+        document.getElementById('msg-body').innerText = "在銀行，您可以選擇申請【融資貸款】來獲得擴廠資金，或是發起【敵意設備收購】接管對手的產線設備。(本回合只能二選一)";
+        
+        const customContent = document.getElementById('msg-custom-content');
+        customContent.innerHTML = '';
+        customContent.classList.remove('hidden');
+
+        // 按鈕一：融資貸款
+        const loanBtn = document.createElement('button');
+        loanBtn.className = "m4-btn w-full mb-3 text-sm";
+        loanBtn.innerText = "💳 申請融資借貸";
+        loanBtn.onclick = () => { openLoanMenu(p); };
+        customContent.appendChild(loanBtn);
+
+        // 按鈕二：敵意設備收購 (只可收購淨資產比自己低的玩家設備)
+        const takeoverBtn = document.createElement('button');
+        takeoverBtn.className = "m4-btn m4-btn-blue w-full text-sm";
+        takeoverBtn.innerText = "⚔️ 發動設備收購";
+        takeoverBtn.onclick = () => { openTakeoverMenu(p); };
+        customContent.appendChild(takeoverBtn);
+
+        document.getElementById('msg-modal').classList.add('active-modal');
+    }
+
+    // 融資借貸選單
+    function openLoanMenu(p) {
+        const propValue = Object.keys(p.owned_data).reduce((acc, idx) => acc + INITIAL_TILES[idx].price, 0);
+        const totalAssets = p.balance + propValue - p.loanDebt;
+        const maxLoan = Math.round(totalAssets * 0.8);
+
+        document.getElementById('msg-title').innerText = "申請融資貸款";
+        document.getElementById('msg-body').innerText = `最大借貸額度為淨資產的 80%：$${maxLoan}。\n還款提醒：下次【回到起點中控室】時，銀行將一次性強制全額扣款清償債務！`;
+        
+        const customContent = document.getElementById('msg-custom-content');
+        customContent.innerHTML = '';
+
+        if (p.loanDebt > 0) {
+            customContent.innerHTML = `<div class="p-4 text-rose-500 font-bold text-center text-xs bg-rose-50 border-2 border-rose-200 rounded-xl">目前尚有債務 $${p.loanDebt} 未結清，無法再次申貸！</div>`;
+        } else {
+            [2000, 5000, maxLoan].forEach(amt => {
+                if (amt <= 0) return;
+                const btn = document.createElement('button');
+                btn.className = "m4-btn m4-btn-blue w-full mb-2 text-sm";
+                btn.innerText = `融資借貸 $${amt}`;
+                btn.onclick = () => {
+                    p.balance += amt;
+                    p.loanDebt = amt;
+                    p.loanInstallments = 1; // 標記有欠款
+                    addLog(`🏦 ${p.name} 向銀行融資 $${amt}，將於回到起點時一次還清。`);
+                    closeModal('msg-modal');
+                    updatePlayersUI();
+                    nextTurn();
+                };
+                customContent.appendChild(btn);
+            });
+        }
+    }
+
+    // 敵意收購選單 (只可收購淨資產比自己低的技術員設備)
+    function openTakeoverMenu(p) {
+        const myAsset = calcTotalAssets(p);
+        
+        // 篩選出「總淨資產低於當前玩家」且「擁有至少一台設備」的對手玩家
+        let targets = players.filter(other => other.id !== p.id && calcTotalAssets(other) < myAsset);
+        
+        document.getElementById('msg-title').innerText = "敵意設備收購";
+        document.getElementById('msg-body').innerText = "您可以出資收購「淨資產低於您」的對手技術員之設備。收購者必須正確回答該設備的專業技術挑戰題，才能收購成功！";
+        
+        const customContent = document.getElementById('msg-custom-content');
+        customContent.innerHTML = '';
+
+        let eligibleProperties = [];
+        targets.forEach(target => {
+            Object.keys(target.owned_data).forEach(tileIdx => {
+                tileIdx = Number(tileIdx);
+                eligibleProperties.push({
+                    tileIdx: tileIdx,
+                    owner: target,
+                    price: INITIAL_TILES[tileIdx].price,
+                    level: target.owned_data[tileIdx].level
+                });
+            });
+        });
+
+        if (eligibleProperties.length === 0) {
+            customContent.innerHTML = `<div class="p-4 text-rose-500 font-bold text-center text-xs bg-rose-50 border-2 border-rose-200 rounded-xl">目前沒有比您資產低且擁有設備的對手可供收購。</div>`;
+        } else {
+            eligibleProperties.forEach(item => {
+                const tile = INITIAL_TILES[item.tileIdx];
+                const btn = document.createElement('button');
+                btn.className = "w-full mb-3 p-3 bg-white hover:bg-blue-50 border-2 border-blue-400 rounded-xl font-bold flex justify-between items-center text-xs text-slate-700 shadow-sm";
+                
+                const canAfford = p.balance >= item.price;
+                if (!canAfford) {
+                    btn.className += " opacity-50 cursor-not-allowed";
+                    btn.disabled = true;
+                }
+
+                btn.innerHTML = `
+                    <div class="text-left">
+                        <span class="text-blue-600">${item.owner.avatar} ${item.owner.name}</span> 的
+                        <p class="font-black text-sm text-slate-800">${tile.name} (Lv.${item.level})</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-rose-600 font-black">收購價 $${item.price}</span>
+                        <p class="text-[9px] text-slate-400">${canAfford ? '點擊發動挑戰' : '資金不足'}</p>
+                    </div>
+                `;
+
+                if (canAfford) {
+                    btn.onclick = () => { startTakeoverQuiz(p, item.owner, item.tileIdx, item.price); };
+                }
+                customContent.appendChild(btn);
+            });
+        }
+    }
+
+    // 發動收購挑戰問答
+    function startTakeoverQuiz(p, owner, tileIdx, price) {
+        const tile = INITIAL_TILES[tileIdx];
+        
+        // 獲取提問庫
+        const quizList = TILE_QUIZ_BANK[tile.name] || TILE_QUIZ_BANK["卡車卸料斗"];
+        // 隨機選出一題
+        const quiz = quizList[Math.floor(Math.random() * quizList.length)];
+        
+        document.getElementById('msg-window-header').innerText = `📐 專業技術收購挑戰：${tile.name}`;
+        document.getElementById('msg-title').innerText = `收購挑戰：答對即可強接收購`;
+        document.getElementById('msg-body').innerText = `技術員 ${p.avatar} ${p.name} 正在收購 ${owner.avatar} ${owner.name} 的設備【${tile.name}】！\n請正確回答以下有關該設備的技術營運提問：\n\n🤔 提問：${quiz.q}`;
+        
+        const customContent = document.getElementById('msg-custom-content');
+        customContent.innerHTML = '';
+
+        quiz.a.forEach((option, oIdx) => {
+            const optBtn = document.createElement('button');
+            optBtn.className = "w-full mb-2 p-3 text-left font-bold text-xs border-2 border-slate-300 bg-slate-50 hover:bg-blue-50 rounded-xl text-slate-700 transition-all";
+            optBtn.innerText = `${String.fromCharCode(65 + oIdx)}) ${option}`;
+            
+            optBtn.onclick = () => {
+                submitTakeoverQuizAnswer(p, owner, tileIdx, price, oIdx, quiz.correct);
+            };
+            customContent.appendChild(optBtn);
+        });
+    }
+
+    // 驗證收購問答答案
+    function submitTakeoverQuizAnswer(p, owner, tileIdx, price, selectedIdx, correctIdx) {
+        const tile = INITIAL_TILES[tileIdx];
+        const customContent = document.getElementById('msg-custom-content');
+        customContent.innerHTML = '';
+
+        if (selectedIdx === correctIdx) {
+            // 回答正確：收購成功
+            p.balance -= price;
+            owner.balance += price;
+            
+            // 轉讓產權
+            p.owned_data[tileIdx] = owner.owned_data[tileIdx];
+            delete owner.owned_data[tileIdx];
+
+            document.getElementById('msg-title').innerText = "🎉 收購成功！";
+            document.getElementById('msg-icon').innerText = "🥳";
+            document.getElementById('msg-body').innerText = `答對了！技術員 ${p.avatar} ${p.name} 以原公司報價 $${price}，成功向 ${owner.avatar} ${owner.name} 收購了設備【${tile.name}】！\n設備連同其原有的等級與配件已成功接管至您的旗下。`;
+            addLog(`🎉 ${p.avatar} ${p.name} 答對挑戰題，以 $${price} 成功收購 ${owner.avatar} ${owner.name} 的 ${tile.name}！`);
+        } else {
+            // 回答錯誤：收購失敗
+            document.getElementById('msg-title').innerText = "❌ 收購挑戰失敗！";
+            document.getElementById('msg-icon').innerText = "😭";
+            document.getElementById('msg-body').innerText = `回答錯誤！技術員 ${p.avatar} ${p.name} 挑戰設備【${tile.name}】失敗，收購宣告泡湯，下次再接再厲。`;
+            addLog(`❌ ${p.avatar} ${p.name} 在收購 ${tile.name} 時回答錯誤，收購失敗。`);
+        }
+
+        const nextBtn = document.createElement('button');
+        nextBtn.className = "m4-btn w-full mt-4";
+        nextBtn.innerText = "完成此回合";
+        nextBtn.onclick = () => {
+            closeModal('msg-modal');
+            renderBoard();
+            updatePlayersUI();
+            nextTurn();
+        };
+        customContent.appendChild(nextBtn);
+    }
 
     // --- 遊戲人數初始載入 ---
     function startGame(count) {
@@ -481,6 +872,7 @@
         }
         currentTurnPlayerIdx = 0;
         expandedPlayerId = 0; // 預設展開第一位技術員的資產摺疊面板
+        turnsSinceLastDeduction = 0; // 重置折舊計數器
         document.getElementById('setup-screen').style.display = 'none';
         initGame();
     }
@@ -574,6 +966,14 @@
                     div.appendChild(barContainer);
                 }
             }
+
+            // 新增功能：點擊設備格時，可以看到該設備資產的相關說明彈窗
+            div.style.cursor = 'pointer';
+            div.onclick = (e) => {
+                // 如果點選的是房產或起點/功能格
+                showPropModal(idx, false, false, true);
+            };
+
             board.appendChild(div);
         });
 
@@ -583,9 +983,9 @@
             <div class="loop-watermark">LOOP</div>
             <div class="rules-container">
                 <h4 class="rules-title">廠區營運手冊</h4>
-                <p class="rule-item">融資服務：依資產上限申貸總資產 80%，每過起點分 5 期自動還款。</p>
+                <p class="rule-item">融資服務：依資產上限申貸總資產 80%，每過起點全額還款自動扣除。</p>
                 <p class="rule-item">邊框標示：Lv1(上右), Lv2(上右下), Lv3(四周)。</p>
-                <p class="rule-item">堅固系統：設備 Lv3 每停留扣 2 點。低於 50% 維修費減半，歸零停收費。</p>
+                <p class="rule-item">堅固系統：所有設備依人數頻率固定扣 1 點堅固。低於 50% 維修費減半，歸零停收費。</p>
                 <p class="rule-item">336 健檢：房主停留自己資產滿 3/6/12 次，該設備堅固值回升 5 點。</p>
                 <p class="rule-item">專業格位：運動場、休息室、洗手間、醫護室觸發隨機工安事件。</p>
             </div>
@@ -639,7 +1039,7 @@
                         <!-- 借貸資訊 -->
                         <div class="bg-amber-50 border border-amber-300 rounded-lg p-2 font-bold text-xs">
                             <span class="text-amber-800">🏦 銀行融資狀態：</span>
-                            ${p.loanDebt > 0 ? `<span class="text-rose-600">欠款 $${Math.round(p.loanDebt)}（賸餘還款 ${p.loanInstallments} 期）</span>` : '<span class="text-slate-500">無任何借貸</span>'}
+                            ${p.loanDebt > 0 ? `<span class="text-rose-600">欠款 $${Math.round(p.loanDebt)}</span>` : '<span class="text-slate-500">無任何借貸</span>'}
                         </div>
                         
                         <!-- 資產設備清單 -->
@@ -651,14 +1051,14 @@
                 // 統計玩家所有持有的地產
                 const ownedTilesIdxs = Object.keys(p.owned_data).map(Number);
                 if (ownedTilesIdxs.length === 0) {
-                    cardContent += `<p class="text-xs text-slate-400 italic">尚無任何生產設備</p>`;
+                    cardContent += `<p class="text-xs text-slate-400 italic">尚無 any 生產設備</p>`;
                 } else {
                     ownedTilesIdxs.forEach(tileIdx => {
                         const tile = INITIAL_TILES[tileIdx];
                         const tileState = p.owned_data[tileIdx];
                         cardContent += `
-                            <div class="flex justify-between items-center text-xs bg-white p-2 rounded border border-slate-200">
-                                <span class="font-black">${tile.name} <span class="text-[10px] text-blue-500">Lv.${tileState.level}</span></span>
+                            <div class="flex justify-between items-center text-xs bg-white p-2 rounded border border-slate-200" onclick="event.stopPropagation(); showPropModal(${tileIdx}, false, false, true)">
+                                <span class="font-black hover:text-blue-500 hover:underline cursor-pointer">${tile.name} <span class="text-[10px] text-blue-500">Lv.${tileState.level}</span></span>
                                 <div class="flex items-center gap-2">
                                     <span class="text-slate-400 font-bold">$${tile.price}</span>
                                     <span class="text-[10px] font-extrabold ${tileState.durability > 50 ? 'text-green-600' : (tileState.durability > 0 ? 'text-amber-500' : 'text-red-500 animate-pulse')}">
@@ -691,7 +1091,7 @@
 
             // 同步顯示於中央當前存款
             if (isCurrent) {
-                document.getElementById('player-balance').innerText = `$${p.balance}`;
+                document.getElementById('player-balance').innerText = `$` + p.balance;
             }
 
             // 更新地圖上的棋子
@@ -752,12 +1152,9 @@
             p.balance += 2500;
             addLog(`🔄 ${p.name} 通過起點，獲得獎金 $2500`);
             if (p.loanDebt > 0) {
-                let repayment = Math.round(p.loanDebt / p.loanInstallments);
-                p.balance -= repayment;
-                p.loanDebt -= repayment;
-                p.loanInstallments--;
-                if (p.loanInstallments <= 0) p.loanDebt = 0;
-                addLog(`🏦 銀行自動扣款：$${repayment}`);
+                p.balance -= p.loanDebt;
+                addLog(`🏦 銀行還款：一次性扣除清償債務 $${p.loanDebt}`);
+                p.loanDebt = 0;
             }
         }
         
@@ -767,23 +1164,10 @@
         handleTile(newPos);
     };
 
-    function isMaxLevel(tileIdx, currentLevel) {
-        const t = INITIAL_TILES[tileIdx];
-        if (!t.upgrades) return true;
-        const steps = t.upgrades.filter(u => u.type === 'step').length;
-        const choice = t.upgrades.some(u => u.type === 'choice') ? 1 : 0;
-        return currentLevel >= (1 + steps + choice);
-    }
-
     function handleTile(pos, fromEvent = false) {
         const t = INITIAL_TILES[pos];
         const p = players[currentTurnPlayerIdx];
         let owner = players.find(player => player.owned_data[pos]);
-
-        if (owner && !fromEvent) {
-             const d = owner.owned_data[pos];
-             if (isMaxLevel(pos, d.level)) d.durability = Math.max(0, d.durability - 2);
-        }
 
         if (owner && owner.id === p.id && !fromEvent) {
             owner.owned_data[pos].visitCount++;
@@ -834,39 +1218,6 @@
         renderBoard();
     }
 
-    function triggerBank(p) {
-        const propValue = Object.keys(p.owned_data).reduce((acc, idx) => acc + INITIAL_TILES[idx].price, 0);
-        const totalAssets = p.balance + propValue;
-        const maxLoan = Math.round(totalAssets * 0.8);
-
-        document.getElementById('msg-title').innerText = "融資中心";
-        document.getElementById('msg-icon').innerText = "🏦";
-        document.getElementById('msg-body').innerText = `目前資產總額：$${totalAssets}\n最高可借貸額度：$${maxLoan}\n(分5期，每過起點自動扣款)`;
-        
-        const customContent = document.getElementById('msg-custom-content');
-        customContent.innerHTML = '';
-        customContent.classList.remove('hidden');
-
-        if (p.loanDebt > 0) {
-            customContent.innerHTML = `<div class="p-4 text-rose-500 font-bold text-sm">目前尚有債務未清償！</div>`;
-        } else {
-            [2000, 5000, maxLoan].forEach(amt => {
-                const btn = document.createElement('button');
-                btn.className = "m4-btn m4-btn-blue w-full mb-2 text-sm";
-                btn.innerText = `融資 $${amt}`;
-                btn.onclick = async () => {
-                    p.balance += amt; p.loanDebt = amt; p.loanInstallments = 5;
-                    addLog(`🏦 ${p.name} 融資 $${amt}`);
-                    closeModal('msg-modal');
-                    updatePlayersUI();
-                    nextTurn();
-                };
-                customContent.appendChild(btn);
-            });
-        }
-        document.getElementById('msg-modal').classList.add('active-modal');
-    }
-
     function triggerRandomSpecial(pos, events) {
         const p = players[currentTurnPlayerIdx];
         const ev = events[Math.floor(Math.random() * events.length)];
@@ -911,7 +1262,7 @@
         if (fee > 0) {
             p.balance -= fee; owner.balance += fee;
             showMsgLocally(type, `${p.name} 向 ${owner.name} 支付 $${fee} 維修費`, "💸");
-            addLog(`💸 ${p.name} 向 ${owner.name} 支付 $${fee}`);
+            addLog(`💸 ${p.name} 向 ${owner.name} 支付 $${fee} 維修費`);
         } else {
             showMsgLocally("正常生產", d.durability <= 0 ? "設備停機中。" : "運轉極佳。", '✅');
         }
@@ -919,14 +1270,14 @@
         nextTurn();
     }
 
-    function showPropModal(pos, canBuy = false, canUpgrade = false) {
+    function showPropModal(pos, canBuy = false, canUpgrade = false, isInspection = false) {
         const t = INITIAL_TILES[pos];
         const p = players[currentTurnPlayerIdx];
         let ownerOfThis = players.find(player => player.owned_data[pos]);
         const d = (ownerOfThis ? ownerOfThis.owned_data[pos] : null) || { level: 1, upgrades: [], durability: 100 };
         
         document.getElementById('prop-name').innerText = t.name;
-        document.getElementById('prop-price').innerText = `$${t.price || 0}`;
+        document.getElementById('prop-price').innerText = `$` + (t.price || 0);
         document.getElementById('prop-desc').innerText = t.desc;
         document.getElementById('prop-level-tag').innerText = `Lv.${d.level}`;
         document.getElementById('prop-color-bar').style.backgroundColor = t.color || '#3b82f6';
@@ -937,8 +1288,8 @@
 
         let m = 1 + (d.level - 1) * 0.5;
         if (d.durability <= 0) m = 0; else if (d.durability < 50) m *= 0.5;
-        document.getElementById('prop-fee-repair').innerText = `-$${Math.round(t.fees.repair * m)}`;
-        document.getElementById('prop-fee-maint').innerText = `-$${Math.round(t.fees.maint * m)}`;
+        document.getElementById('prop-fee-repair').innerText = `-$` + Math.round(t.fees.repair * m);
+        document.getElementById('prop-fee-maint').innerText = `-$` + Math.round(t.fees.maint * m);
         
         const actions = document.getElementById('prop-actions');
         actions.innerHTML = '';
@@ -946,42 +1297,47 @@
         const upList = document.getElementById('upgrade-list');
         upSection.classList.add('hidden');
         
-        if (canBuy && p.balance >= t.price) {
-            const b = document.createElement('button');
-            b.className = "m4-btn w-full text-sm";
-            b.innerText = `投資收購 ($${t.price})`;
-            b.onclick = () => buyProp(pos);
-            actions.appendChild(b);
-        }
-        
-        if (canUpgrade && t.upgrades) {
-            upSection.classList.remove('hidden');
-            upList.innerHTML = '';
-            t.upgrades.forEach(u => {
-                const has = d.upgrades.includes(u.name);
-                const stepLock = u.type === 'step' && d.level < u.levelReq;
-                const btn = document.createElement('button');
-                btn.className = `p-3 rounded-lg border-2 flex flex-col items-start transition-all ${has ? 'bg-green-50 border-green-400' : (stepLock ? 'opacity-30 grayscale' : 'bg-white border-blue-200 hover:border-blue-400')}`;
-                btn.disabled = has || stepLock;
-                btn.innerHTML = `<div class="flex justify-between w-full font-black text-[12px]"><span>${u.name}</span><span class="text-blue-600">${has ? 'OK' : '$' + u.price}</span></div>`;
-                btn.onclick = () => upgradeProp(pos, u);
-                upList.appendChild(btn);
-            });
-            if (ownerOfThis && d.durability < 100) {
-                const refurbBtn = document.createElement('button');
-                refurbBtn.className = "m4-btn m4-btn-blue w-full mt-2 text-sm";
-                refurbBtn.innerText = `🛠️ 重新裝修 (重置等級)`;
-                refurbBtn.onclick = () => refurbishProp(pos);
-                actions.appendChild(refurbBtn);
+        // 只有非檢視（手動點選）模式，且玩家有足夠預算時才顯示購買/升級按鈕
+        if (!isInspection) {
+            if (canBuy && p.balance >= t.price) {
+                const b = document.createElement('button');
+                b.className = "m4-btn w-full text-sm";
+                b.innerText = `投資收購 ($` + t.price + `)`;
+                b.onclick = () => buyProp(pos);
+                actions.appendChild(b);
+            }
+            
+            if (canUpgrade && t.upgrades) {
+                upSection.classList.remove('hidden');
+                upList.innerHTML = '';
+                t.upgrades.forEach(u => {
+                    const has = d.upgrades.includes(u.name);
+                    const stepLock = u.type === 'step' && d.level < u.levelReq;
+                    const btn = document.createElement('button');
+                    btn.className = `p-3 rounded-lg border-2 flex flex-col items-start transition-all ${has ? 'bg-green-50 border-green-400' : (stepLock ? 'opacity-30 grayscale' : 'bg-white border-blue-200 hover:border-blue-400')}`;
+                    btn.disabled = has || stepLock;
+                    btn.innerHTML = `<div class="flex justify-between w-full font-black text-[12px]"><span>${u.name}</span><span class="text-blue-600">${has ? 'OK' : '$' + u.price}</span></div>${u.upgradeNote ? `<div class="text-[10px] text-slate-500 mt-1 leading-tight text-left">${u.upgradeNote}</div>` : ''}`;
+                    btn.onclick = () => upgradeProp(pos, u);
+                    upList.appendChild(btn);
+                });
+                if (ownerOfThis && d.durability < 100) {
+                    const refurbBtn = document.createElement('button');
+                    refurbBtn.className = "m4-btn m4-btn-blue w-full mt-2 text-sm";
+                    refurbBtn.innerText = `🛠️ 重新裝修 (重置等級)`;
+                    refurbBtn.onclick = () => refurbishProp(pos);
+                    actions.appendChild(refurbBtn);
+                }
             }
         }
         
         const closeBtn = document.createElement('button');
         closeBtn.className = "m4-btn m4-btn-blue w-full opacity-60 text-sm";
-        closeBtn.innerText = "完成作業";
+        closeBtn.innerText = isInspection ? "關閉說明" : "完成作業";
         closeBtn.onclick = async () => { 
             closeModal('property-modal'); 
-            nextTurn(); 
+            if (!isInspection) {
+                nextTurn(); 
+            }
         };
         actions.appendChild(closeBtn);
         document.getElementById('property-modal').classList.add('active-modal');
@@ -1004,6 +1360,13 @@
             p.balance -= upgrade.price;
             p.owned_data[pos].upgrades.push(upgrade.name);
             p.owned_data[pos].level += 1;
+            
+            // 拌合機升級Lv.3（即擁有高級耐磨備品）時一次性恢復堅固值10點
+            if (INITIAL_TILES[pos].name === '拌合機' && p.owned_data[pos].level === 3) {
+                p.owned_data[pos].durability = Math.min(100, p.owned_data[pos].durability + 10);
+                addLog(`✨ 拌合機成功更換最高級耐磨備品，堅固值提升 10 點！當前堅固值：${p.owned_data[pos].durability}%`);
+            }
+            
             addLog(`🛠️ ${p.avatar} ${p.name} 升級 ${INITIAL_TILES[pos].name}`);
             closeModal('property-modal'); 
             updatePlayersUI(); 
@@ -1036,8 +1399,27 @@
         }
     }
 
+    function handleSellCurrentGlobal() {
+        handleSellCurrent();
+    }
+
     function nextTurn() {
         if (rollAgain) return;
+        
+        // 折舊磨損方式依照遊玩人數進行變動
+        turnsSinceLastDeduction++;
+        const targetTurns = (7 - players.length) * players.length;
+        if (turnsSinceLastDeduction >= targetTurns) {
+            turnsSinceLastDeduction = 0;
+            players.forEach(p => {
+                Object.keys(p.owned_data).forEach(tileIdx => {
+                    let d = p.owned_data[tileIdx];
+                    d.durability = Math.max(0, d.durability - 1);
+                });
+            });
+            addLog("🔧 [全廠折舊] 全廠設備進行例行折舊磨損，所有已購設備堅固值磨損 1 點。");
+        }
+
         currentTurnPlayerIdx = (currentTurnPlayerIdx + 1) % players.length;
         updateTurnUI();
         updatePlayersUI();
@@ -1077,7 +1459,8 @@
     // 註冊全域 window 物件以便 onclick 呼叫相容
     window.closeModal = closeModal;
     window.startGame = startGame;
-    window.handleSellCurrent = handleSellCurrent;
+    window.handleSellCurrent = handleSellCurrentGlobal;
+    window.showPropModal = showPropModal;
 </script>
 </body>
 </html>
